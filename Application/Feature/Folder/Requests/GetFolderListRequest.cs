@@ -1,0 +1,19 @@
+﻿using Application.DTO.Folder;
+using MediatR;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Application.Features.Folder.Request
+{
+    public class GetFolderListRequest : IRequest<List<FolderDTO>>
+    {
+        public Guid UserId { get; set; }
+        public bool IncludePublics { get; set; } = false;
+        public bool HasAdminAccess { get; set; } = false;
+        public int Skip { get; set; } = 0;
+        public int PageSize { get; set; } = 100;
+    }
+}

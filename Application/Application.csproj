@@ -34,8 +34,26 @@
     <Reference Include="AutoMapper, Version=8.0.0.0, Culture=neutral, PublicKeyToken=be96cd2c38ef1005, processorArchitecture=MSIL">
       <HintPath>..\packages\AutoMapper.8.0.0\lib\net461\AutoMapper.dll</HintPath>
     </Reference>
+    <Reference Include="MediatR, Version=12.0.0.0, Culture=neutral, PublicKeyToken=bb9a41a5e8aaa7e2, processorArchitecture=MSIL">
+      <HintPath>..\packages\MediatR.12.0.1\lib\netstandard2.0\MediatR.dll</HintPath>
+    </Reference>
+    <Reference Include="MediatR.Contracts, Version=2.0.1.0, Culture=neutral, PublicKeyToken=bb9a41a5e8aaa7e2, processorArchitecture=MSIL">
+      <HintPath>..\packages\MediatR.Contracts.2.0.1\lib\netstandard2.0\MediatR.Contracts.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=7.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Bcl.AsyncInterfaces.7.0.0\lib\netstandard2.0\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.DependencyInjection.Abstractions, Version=7.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Extensions.DependencyInjection.Abstractions.7.0.0\lib\netstandard2.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.6.0.0\lib\net461\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Threading.Tasks.Extensions, Version=4.2.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Threading.Tasks.Extensions.4.5.4\lib\net461\System.Threading.Tasks.Extensions.dll</HintPath>
+    </Reference>
     <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.ValueTuple.4.5.0\lib\net461\System.ValueTuple.dll</HintPath>
     </Reference>
@@ -53,7 +71,32 @@
     <Compile Include="DTO\User\CreateUserDTO.cs" />
     <Compile Include="DTO\User\UpdateUserDTO.cs" />
     <Compile Include="DTO\User\UserDTO.cs" />
+    <Compile Include="Feature\Folder\Handlers\Command\AddFolderRequestHandler.cs" />
+    <Compile Include="Feature\Folder\Handlers\Command\DeleteFolderRequestHandler.cs" />
+    <Compile Include="Feature\Folder\Handlers\Command\UpdateFolderRequestHandler.cs" />
+    <Compile Include="Feature\Folder\Handlers\Query\GetFolderListRequestHandler.cs" />
+    <Compile Include="Feature\Folder\Handlers\Query\GetFolderRequestHandler.cs" />
+    <Compile Include="Feature\Folder\Requests\AddFolderRequest.cs" />
+    <Compile Include="Feature\Folder\Requests\DeleteFolderRequest.cs" />
+    <Compile Include="Feature\Folder\Requests\GetFolderListRequest.cs" />
+    <Compile Include="Feature\Folder\Requests\GetFolderRequest.cs" />
+    <Compile Include="Feature\Folder\Requests\UpdateFolderRequest.cs" />
+    <Compile Include="Feature\User\Handlers\Command\AddUserRequestHandler.cs" />
+    <Compile Include="Feature\User\Handlers\Command\DeleteUserRequestHandler.cs" />
+    <Compile Include="Feature\User\Handlers\Command\UpdateUserRequestHandler.cs" />
+    <Compile Include="Feature\User\Handlers\Command\UserLoginRequestHandler.cs" />
+    <Compile Include="Feature\User\Handlers\Query\GetUserListRequestHandler.cs" />
+    <Compile Include="Feature\User\Handlers\Query\GetUserRequestHandler.cs" />
+    <Compile Include="Feature\User\Requests\AddUserRequest.cs" />
+    <Compile Include="Feature\User\Requests\DeleteUserRequest.cs" />
+    <Compile Include="Feature\User\Requests\GetUserListRequest.cs" />
+    <Compile Include="Feature\User\Requests\GetUserRequest.cs" />
+    <Compile Include="Feature\User\Requests\UpdateUserRequest.cs" />
+    <Compile Include="Feature\User\Requests\UserLoginRequest.cs" />
     <Compile Include="Model\LoginCredential.cs" />
+    <Compile Include="Persistence\Common\IBaseRepository.cs" />
+    <Compile Include="Persistence\IFolderRepository.cs" />
+    <Compile Include="Persistence\IUserRepository.cs" />
     <Compile Include="Profiles\MapperProfile.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -64,7 +107,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
