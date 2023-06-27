@@ -8,8 +8,8 @@ namespace Application.Persistence.Common
 {
     public interface IBaseRepository
     {
-        Task<bool> Add<T>(T entity);
-        Task<bool> Delete<T>(T entity);
-        Task<bool> Update<T>(T entity);
+        Task<bool> Add<T>(T entity) where T : class;
+        Task<bool> Delete<T>(T entity) where T : class;
+        Task<bool> Update<T>(T entity) where T : class;
     }
 }

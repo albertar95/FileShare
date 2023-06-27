@@ -65,6 +65,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ApplicationServiceRegistration.cs" />
     <Compile Include="DTO\Folder\CreateFolderDTO.cs" />
     <Compile Include="DTO\Folder\FolderDTO.cs" />
     <Compile Include="DTO\Folder\UpdateFolderDTO.cs" />

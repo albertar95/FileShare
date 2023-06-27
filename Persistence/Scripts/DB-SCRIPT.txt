@@ -1,0 +1,23 @@
+            Create Table Users(
+                        Id TEXT PRIMARY KEY  NOT NULL,
+                        Username TEXT NOT NULL,
+                        Password TEXT NOT NULL,
+                        Fullname TEXT NOT NULL,
+                        LastLoginDate DateTime NULL,
+                        IsDisabled INT NOT NULL,
+                        IsAdmin INT NOT NULL,
+                        CreateDate DateTime NOT NULL,
+                        LastModified DateTime NULL
+              )
+            Create Table Folders(
+                        Id TEXT PRIMARY KEY  NOT NULL,
+                        Title TEXT NOT NULL,
+                        IsLocal INT NOT NULL,
+                        IsPublic INT NOT NULL,
+                        IsProtected INT NOT NULL,
+                        Path TEXT NOT NULL,
+                        UserId TEXT NOT NULL,
+                        CreateDate DateTime NOT NULL,
+                        LastModified DateTime NULL,
+		        FOREIGN KEY(UserId) REFERENCES Users(Id)
+                 )

@@ -11,8 +11,8 @@ namespace Application.Persistence
 {
     public interface IUserRepository : IBaseRepository
     {
-        Task<List<User>> GetUsers(bool IncludeDisabled = true,int Skip = 0,int PageSize = 100);
-        Task<User> GetUserById(Guid Id);
-        Task<Tuple<byte,User>> LoginUser(string Username,string Password);
+        List<User> GetUsers(bool IncludeDisabled = true,int Skip = 0,int PageSize = 100);
+        User GetUserById(Guid Id);
+        Tuple<byte, User> LoginUser(string Username,string Password);
     }
 }

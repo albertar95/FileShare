@@ -10,8 +10,8 @@ namespace Application.Persistence
 {
     public interface IFolderRepository : IBaseRepository
     {
-        Task<List<Folder>> GetFoldersByUserId(Guid UserId,bool IncludePublics = false,bool HasAdminAccess = false
+        List<Folder> GetFoldersByUserId(Guid UserId,bool IncludePublics = false,bool HasAdminAccess = false
             , int Skip = 0, int PageSize = 100);
-        Task<Folder> GetFolderById(Guid Id);
+        Folder GetFolderById(Guid Id);
     }
 }
