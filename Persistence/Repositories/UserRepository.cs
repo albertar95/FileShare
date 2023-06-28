@@ -3,6 +3,7 @@ using Domain;
 using Persistence.Contexts;
 using System;
 using System.Collections.Generic;
+using System.Data.SQLite;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,11 +16,12 @@ namespace Persistence.Repositories
         public UserRepository(FileShareDbContext context) : base(context)
         {
             _context = context;
+            _context.Configuration.AutoDetectChangesEnabled = false;
         }
 
         public User GetUserById(Guid Id)
         {
-            return _context.Users.FirstOrDefault(p => p.Id == Id);
+            return _context.Users.ToList().FirstOrDefault(p => p.Id == Id);
         }
 
         public List<User> GetUsers(bool IncludeDisabled = true, int Skip = 0, int PageSize = 100)
@@ -33,19 +35,19 @@ namespace Persistence.Repositories
         public Tuple<byte, User> LoginUser(string Username, string Password)
         {
             var user = _context.Users.FirstOrDefault(p => p.Username.Trim() == Username.Trim());
-            if (user == null) return new Tuple<byte, User>(0, null);
+            if (user == null) return new Tuple<byte, User>(1, null);
             else
             {
-                if (user.IsDisabled) return new Tuple<byte, User>(1, null);
+                if (user.IsDisabled) return new Tuple<byte, User>(2, null);
                 else
                 {
-                    if (user.Password != Password) return new Tuple<byte, User>(2, null);
+                    if (user.Password != Password) return new Tuple<byte, User>(3, null);
                     else
                     {
                         user.LastLoginDate = DateTime.Now;
                         _context.Entry(user).State = System.Data.Entity.EntityState.Modified;
                         _context.SaveChanges();
-                        return new Tuple<byte, User>(3, user);
+                        return new Tuple<byte, User>(4, user);
                     }
                 }
             }

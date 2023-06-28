@@ -1,7 +1,9 @@
 ﻿using Application.Persistence.Common;
+using Domain;
 using Persistence.Contexts;
 using System;
 using System.Collections.Generic;
+using System.Data.SQLite;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,6 +17,7 @@ namespace Persistence.Repositories
         public BaseRepository(FileShareDbContext context)
         {
             _context = context;
+            _context.Configuration.AutoDetectChangesEnabled = false;
         }
         public async Task<bool> Add<T>(T entity) where T : class
         {

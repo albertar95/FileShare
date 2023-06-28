@@ -13,12 +13,7 @@ namespace Persistence.Contexts
     {
         public DbSet<Folder> Folders { get; set; }
         public DbSet<User> Users { get; set; }
-        public FileShareDbContext(string nameOrConnectionString) : base(
-            new SQLiteConnection()
-            {
-                ConnectionString = new SQLiteConnectionStringBuilder()
-                { DataSource = "D:\\SqlData\\FileShareDb\\FileShareDb.db", ForeignKeys = true }.ConnectionString
-            }, true)
+        public FileShareDbContext(SQLiteConnection connection) : base(connection, true)
         {
         }
         protected override void OnModelCreating(DbModelBuilder builder)

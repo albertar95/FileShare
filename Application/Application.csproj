@@ -72,33 +72,12 @@
     <Compile Include="DTO\User\CreateUserDTO.cs" />
     <Compile Include="DTO\User\UpdateUserDTO.cs" />
     <Compile Include="DTO\User\UserDTO.cs" />
-    <Compile Include="Feature\Folder\Handlers\Command\AddFolderRequestHandler.cs" />
-    <Compile Include="Feature\Folder\Handlers\Command\DeleteFolderRequestHandler.cs" />
-    <Compile Include="Feature\Folder\Handlers\Command\UpdateFolderRequestHandler.cs" />
-    <Compile Include="Feature\Folder\Handlers\Query\GetFolderListRequestHandler.cs" />
-    <Compile Include="Feature\Folder\Handlers\Query\GetFolderRequestHandler.cs" />
-    <Compile Include="Feature\Folder\Requests\AddFolderRequest.cs" />
-    <Compile Include="Feature\Folder\Requests\DeleteFolderRequest.cs" />
-    <Compile Include="Feature\Folder\Requests\GetFolderListRequest.cs" />
-    <Compile Include="Feature\Folder\Requests\GetFolderRequest.cs" />
-    <Compile Include="Feature\Folder\Requests\UpdateFolderRequest.cs" />
-    <Compile Include="Feature\User\Handlers\Command\AddUserRequestHandler.cs" />
-    <Compile Include="Feature\User\Handlers\Command\DeleteUserRequestHandler.cs" />
-    <Compile Include="Feature\User\Handlers\Command\UpdateUserRequestHandler.cs" />
-    <Compile Include="Feature\User\Handlers\Command\UserLoginRequestHandler.cs" />
-    <Compile Include="Feature\User\Handlers\Query\GetUserListRequestHandler.cs" />
-    <Compile Include="Feature\User\Handlers\Query\GetUserRequestHandler.cs" />
-    <Compile Include="Feature\User\Requests\AddUserRequest.cs" />
-    <Compile Include="Feature\User\Requests\DeleteUserRequest.cs" />
-    <Compile Include="Feature\User\Requests\GetUserListRequest.cs" />
-    <Compile Include="Feature\User\Requests\GetUserRequest.cs" />
-    <Compile Include="Feature\User\Requests\UpdateUserRequest.cs" />
-    <Compile Include="Feature\User\Requests\UserLoginRequest.cs" />
+    <Compile Include="EntityMapper\Contract\IEntityMapper.cs" />
+    <Compile Include="EntityMapper\Service\EntityMapper.cs" />
     <Compile Include="Model\LoginCredential.cs" />
     <Compile Include="Persistence\Common\IBaseRepository.cs" />
     <Compile Include="Persistence\IFolderRepository.cs" />
     <Compile Include="Persistence\IUserRepository.cs" />
-    <Compile Include="Profiles\MapperProfile.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

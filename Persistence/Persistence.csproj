@@ -73,6 +73,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Contexts\FileShareDbContext.cs" />
+    <Compile Include="Contexts\SQLiteConfiguration.cs" />
     <Compile Include="Migrations\202306270828515_InitialDb.cs" />
     <Compile Include="Migrations\202306270828515_InitialDb.designer.cs">
       <DependentUpon>202306270828515_InitialDb.cs</DependentUpon>
