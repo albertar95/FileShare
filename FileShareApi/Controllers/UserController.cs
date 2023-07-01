@@ -1,5 +1,6 @@
 ﻿using Application.DTO.User;
 using Application.EntityMapper.Contract;
+using Application.Helper;
 using Application.Model;
 using Application.Persistence;
 using Domain;
@@ -28,6 +29,7 @@ namespace FileShareApi.Controllers
         {
             try
             {
+                user.Password = Encryption.MapFromViewToPersistence(user.Password);
                 return Ok(await _userRepository.Add(_mapper.EntityMap<Domain.User>(user)));
             }
             catch (Exception ex)
@@ -35,7 +37,7 @@ namespace FileShareApi.Controllers
                 return InternalServerError(ex);
             }
         }
-        [HttpPatch]
+        [HttpPost]
         public async Task<IHttpActionResult> Patch([FromBody] UpdateUserDTO user)
         {
             try
@@ -44,9 +46,10 @@ namespace FileShareApi.Controllers
                 if (Currentuser == null) return NotFound();
                 else
                 {
+                    user.Password = Encryption.MapFromViewToPersistence(user.Password);
                     Currentuser = _mapper.EntityMap<User>(user, Currentuser);
                     if (await _userRepository.Update(Currentuser))
-                        return Ok();
+                        return Ok(true);
                     else
                         return InternalServerError();
                 }
@@ -57,16 +60,16 @@ namespace FileShareApi.Controllers
             }
         }
         [HttpDelete]
-        public async Task<IHttpActionResult> Delete(Guid userId)
+        public async Task<IHttpActionResult> Delete(Guid id)
         {
             try
             {
-                var Currentuser = _userRepository.GetUserById(userId);
+                var Currentuser = _userRepository.GetUserById(id);
                 if (Currentuser == null) return NotFound();
                 else
                 {
                     if (await _userRepository.Delete(Currentuser))
-                        return Ok();
+                        return Ok(true);
                     else
                         return InternalServerError();
                 }
@@ -81,7 +84,14 @@ namespace FileShareApi.Controllers
         {
             try
             {
-                return Ok(_mapper.EntityMap<List<UserDTO>>(_userRepository.GetUsers(IncludeDisabled, Skip, PageSize)));
+                var result = new List<UserDTO>();
+                var users = _userRepository.GetUsers(IncludeDisabled, Skip, PageSize).ToList();
+                foreach (var usr in users)
+                {
+                    result.Add(_mapper.EntityMap<UserDTO>(usr));
+                }
+                result.ForEach(p => { p.Password = Encryption.MapFromPersistenceToView(p.Password); });
+                return Ok(result);
             }
             catch (Exception ex)
             {
@@ -94,7 +104,11 @@ namespace FileShareApi.Controllers
         {
             try
             {
-                return Ok(_mapper.EntityMap<UserDTO>(_userRepository.GetUserById(UserId)));
+                var result = new UserDTO();
+                var user = _userRepository.GetUserById(UserId);
+                result = _mapper.EntityMap<UserDTO>(user);
+                result.Password = Encryption.MapFromPersistenceToView(user.Password);
+                return Ok(result);
             }
             catch (Exception ex)
             {
@@ -106,21 +120,32 @@ namespace FileShareApi.Controllers
         {
             try
             {
+                user.Password = Encryption.MapFromViewToPersistence(user.Password);
                 var loginResult = _userRepository.LoginUser(user.Username, user.Password);
+                LoginResult result = new LoginResult() {  successLogin = false, User = null };
                 switch (loginResult.Item1)
                 {
                     case 1:
-                        return Ok(new { successLogin = false, message = "user not found" });
+                        result.message = "user not found";
+                        break;
                     case 2:
-                        return Ok(new { successLogin = false, message = "user is disabled" });
+                        result.message = "user is disabled";
+                        break;
                     case 3:
-                        return Ok(new { successLogin = false, message = "password not match" });
+                        result.message = "password not match";
+                        break;
                     case 4:
-                        return Ok(new { successLogin = true, message = "login successfull", CurrentUser = loginResult.Item2 });
+                        result.successLogin = true;
+                        result.message = "login successfull";
+                        loginResult.Item2.Password = Encryption.MapFromPersistenceToView(loginResult.Item2.Password);
+                        result.User = _mapper.EntityMap<UserDTO>(loginResult.Item2);
+                        break;
                     default:
-                        return Ok(new { successLogin = false, message = "error not specified" });
+                        result.message = "error not specified";
+                        break;
 
                 }
+                return Ok(result);
             }
             catch (Exception ex)
             {

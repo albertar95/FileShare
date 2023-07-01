@@ -54,7 +54,7 @@ namespace FileShareApi.App_Start
                     ConnectionString = new SQLiteConnectionStringBuilder()
                     { DataSource = SQLiteCnn, ForeignKeys = true }.ConnectionString
                 })).InstancePerRequest();
-            builder.RegisterType(typeof(EntityMapper)).As(typeof(IEntityMapper)).SingleInstance();
+            builder.RegisterType(typeof(EntityMapper)).As(typeof(IEntityMapper)).InstancePerRequest();
             Container = builder.Build();
 
             return Container;

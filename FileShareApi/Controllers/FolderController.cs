@@ -35,7 +35,7 @@ namespace FileShareApi.Controllers
                 return InternalServerError(ex);
             }
         }
-        [HttpPatch]
+        [HttpPost]
         public async Task<IHttpActionResult> Patch([FromBody] UpdateFolderDTO folder)
         {
             try
@@ -46,7 +46,7 @@ namespace FileShareApi.Controllers
                 {
                     CurrentFolder = _mapper.EntityMap<Folder>(folder, CurrentFolder);
                     if (await _folderRepository.Update(CurrentFolder))
-                        return Ok();
+                        return Ok(true);
                     else
                         return InternalServerError();
                 }
@@ -57,11 +57,11 @@ namespace FileShareApi.Controllers
             }
         }
         [HttpDelete]
-        public async Task<IHttpActionResult> Delete(Guid userId)
+        public async Task<IHttpActionResult> Delete(Guid id)
         {
             try
             {
-                var folder = _folderRepository.GetFolderById(userId);
+                var folder = _folderRepository.GetFolderById(id);
                 if (folder == null) return NotFound();
                 else
                 {
@@ -78,7 +78,7 @@ namespace FileShareApi.Controllers
                         }
                     }
                     if (result)
-                        return Ok();
+                        return Ok(true);
                     else
                         return InternalServerError();
                 }

@@ -94,10 +94,13 @@
   <ItemGroup>
     <Content Include="Content\assets\css\bootstrap.css" />
     <Content Include="Content\assets\css\custom.css" />
+    <Content Include="Content\assets\css\ErrorHandle.css" />
     <Content Include="Content\assets\css\font-awesome.css" />
+    <Content Include="Content\assets\css\Login.css" />
     <Content Include="Content\assets\font-awesome\fonts\fontawesome-webfontba72.svg" />
     <Content Include="Content\assets\fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Content\assets\fonts\googlefonts.css" />
+    <Content Include="Content\assets\fonts\googlefonts2.css" />
     <Content Include="Content\assets\img\1.png" />
     <Content Include="Content\assets\img\2.png" />
     <Content Include="Content\assets\img\3.png" />
@@ -114,7 +117,9 @@
     <Content Include="Content\assets\js\morris\morris.js" />
     <Content Include="Content\assets\js\morris\raphael-2.1.0.min.js" />
     <Content Include="Global.asax" />
-    <Content Include="Web.config" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\RouteConfig.cs" />
@@ -123,6 +128,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Helpers\ApiHelper.cs" />
+    <Compile Include="Helpers\DirectoryHelper.cs" />
     <Compile Include="Helpers\EncryptionHelper.cs" />
     <Compile Include="Helpers\ViewHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -141,6 +147,16 @@
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Home\Folders.cshtml" />
+    <Content Include="Views\Home\Users.cshtml" />
+    <Content Include="Views\Home\UserProfile.cshtml" />
+    <Content Include="Views\Home\Login.cshtml" />
+    <Content Include="Views\Home\ErrorHandling.cshtml" />
+    <Content Include="Views\Home\AddFolder.cshtml" />
+    <Content Include="Views\Home\EditFolder.cshtml" />
+    <Content Include="Views\Home\FolderDetail.cshtml" />
+    <Content Include="Views\Home\AddUser.cshtml" />
+    <Content Include="Views\Home\EditUser.cshtml" />
+    <Content Include="Views\Home\UserDetail.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -150,6 +166,12 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Application\Application.csproj">
+      <Project>{36f6b050-aa43-41a6-aba9-5d02b6f3e967}</Project>
+      <Name>Application</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

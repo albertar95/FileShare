@@ -74,7 +74,9 @@
     <Compile Include="DTO\User\UserDTO.cs" />
     <Compile Include="EntityMapper\Contract\IEntityMapper.cs" />
     <Compile Include="EntityMapper\Service\EntityMapper.cs" />
+    <Compile Include="Helper\Encryption.cs" />
     <Compile Include="Model\LoginCredential.cs" />
+    <Compile Include="Model\LoginResult.cs" />
     <Compile Include="Persistence\Common\IBaseRepository.cs" />
     <Compile Include="Persistence\IFolderRepository.cs" />
     <Compile Include="Persistence\IUserRepository.cs" />
