@@ -7,7 +7,7 @@
 
 <div class="row" style="display:flex;">
     <div class="col-md-3">
-        <a href="@Url.Action("AddUser","Home")" class="btn btn-success"><i class="fa fa-plus"></i> add </a>
+        <a style="margin:10px;" href="@Url.Action("AddUser","Home")" class="btn btn-success"><i class="fa fa-plus"></i> add </a>
     </div>
     <div class="col-md-9">
         <div class="alert alert-success alert-dismissable" id="divSuccess" hidden>
@@ -34,10 +34,10 @@
                     <table class="table table-striped table-bordered table-hover" id="dataTables-example">
                         <thead>
                             <tr>
-                                <th>Username</th>
-                                <th>Fullname</th>
-                                <th>Access Level</th>
-                                <th>Actions</th>
+                                <th style="text-align:center;">Username</th>
+                                <th style="text-align:center;">Fullname</th>
+                                <th style="text-align:center;">Access Level</th>
+                                <th style="text-align:center;">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -46,17 +46,17 @@
                                 if (IsOdd)
                                 {
                                     <tr class="odd gradeA">
-                                        <td class="center">@usr.Username</td>
-                                        <td class="center">@usr.Fullname</td>
+                                        <td style="text-align:center;">@usr.Username</td>
+                                        <td style="text-align:center;">@usr.Fullname</td>
                                         @if (usr.IsAdmin)
                                         {
-                                            <td class="center">Admin User</td>
+                                            <td style="text-align:center;">Admin User</td>
                                         }
                                         else
                                         {
-                                            <td class="center">Simple User</td>
+                                            <td style="text-align:center;">Simple User</td>
                                         }
-                                        <td class="center">
+                                        <td style="text-align:center;">
                                             <a href="@Url.Action("EditUser","Home",new { UserId = usr.Id })" class="btn btn-warning"><i class="fa fa-pencil"></i></a>
                                             <a href="#" onclick="DeleteUser(event,'@usr.Id','@usr.Username')" class="btn btn-danger"><i class="fa fa-trash-o"></i></a>
                                             <a href="@Url.Action("UserDetail","Home",new { UserId = usr.Id })" class="btn btn-info"><i class="fa fa-info"></i></a>
@@ -66,17 +66,17 @@
                                 else
                                 {
                                     <tr class="even gradeA">
-                                        <td class="center">@usr.Username</td>
-                                        <td class="center">@usr.Fullname</td>
+                                        <td style="text-align:center;">@usr.Username</td>
+                                        <td style="text-align:center;">@usr.Fullname</td>
                                         @if (usr.IsAdmin)
                                         {
-                                            <td class="center">Admin User</td>
+                                            <td style="text-align:center;">Admin User</td>
                                         }
                                         else
                                         {
-                                            <td class="center">Simple User</td>
+                                            <td style="text-align:center;">Simple User</td>
                                         }
-                                        <td class="center">
+                                        <td style="text-align:center;">
                                             <a href="@Url.Action("EditUser","Home",new { UserId = usr.Id })" class="btn btn-warning"><i class="fa fa-pencil"></i></a>
                                             <a href="#" onclick="DeleteUser(event,'@usr.Id','@usr.Username')" class="btn btn-danger"><i class="fa fa-trash-o"></i></a>
                                             <a href="@Url.Action("UserDetail","Home",new { UserId = usr.Id })" class="btn btn-info"><i class="fa fa-info"></i></a>

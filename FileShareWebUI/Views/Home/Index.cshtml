@@ -1,8 +1,88 @@
-﻿
+﻿@model List<Application.DTO.Folder.FolderDTO>
 @{
     ViewBag.Title = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>Index</h2>
+@for (int i = 0; i <= Model.Count / 4; i++)
+{
+<div class="row">
+    @foreach (var fld in Model.OrderBy(p => p.UserId).ThenBy(p => p.Title).Skip(i*4).Take(4))
+    {
+    <div class="col-md-3">
+        <div class="panel panel-warning">
+            <div class="panel-heading">
+                <a href="@Url.Action("Folder","Home",new { Id = fld.Id })">@fld.Title</a>
+            </div>
+            <div class="panel-body">
+                <ul>
+                    @if (fld.IsLocal)
+                    {
+                        <li>Local</li>
+                    }
+                    else
+                    {
+                        <li>Virtual</li>
+                    }
+                    @if (fld.IsPublic)
+                    {
+                        <li>Public</li>
+                    }
+                    else
+                    {
+                        <li>Private</li>
+                    }
+                    @if (fld.IsProtected)
+                    {
+                        <li>Protected</li>
+                    }
+                    else
+                    {
+                        <li>Not Protected</li>
+                    }
+                </ul>
+            </div>
+            <div class="panel-footer">
+                created by @fld.Username
+            </div>
+        </div>
+    </div>
+    }
+</div>
+}
+
+@section Scripts
+{
+    <script type="text/javascript">
+    $(function()
+    {
+            $("#btnFilter").click(function(e)
+            {
+                e.preventDefault();
+                if ($("#FilterSection").is(":hidden"))
+                {
+                    $("#FilterSection").removeAttr('hidden');
+                }else
+                {
+                    $("#FilterSection").attr('hidden','hidden');
+                }
+            });
+    });
+        function FilterThis()
+        {
+            $.ajax(
+                {
+                    url: '@Url.Action("FilterFolders","Admin")',
+                    type: 'post',
+                    datatype: 'json',
+                    data: { FolderIcon: $("#sltFolderType").find(":selected").val(), FolderName: $("#txtSearch").val() },
+                    success: function (result) {
+                        if (result.hasvalue)
+                            $("#folderWrapper").html(result.html);
+                    },
+                    error: function () { }
+                });
+        }
+    </script>
+}
 

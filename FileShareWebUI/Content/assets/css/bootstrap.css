@@ -618,6 +618,7 @@ dd {
   }
   .dl-horizontal dd {
     margin-left: 180px;
+    width:50%;
   }
 }
 abbr[title],

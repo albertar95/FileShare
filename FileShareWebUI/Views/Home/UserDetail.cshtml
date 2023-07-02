@@ -8,76 +8,67 @@
 <h2>User Detail</h2>
 
 <div>
-    <h4>UserDTO</h4>
-    <hr />
     <dl class="dl-horizontal">
-        <dt>
-            @Html.DisplayNameFor(model => model.CreateDate)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.CreateDate)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.LastModified)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.LastModified)
-        </dd>
-
-        <dt>
+        <dt style="margin-bottom:5px;">
             @Html.DisplayNameFor(model => model.Username)
         </dt>
 
-        <dd>
+        <dd class="form-control" style="margin-bottom:5px;">
             @Html.DisplayFor(model => model.Username)
         </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.Password)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Password)
-        </dd>
-
-        <dt>
+        <dt style="margin-bottom:5px;">
             @Html.DisplayNameFor(model => model.Fullname)
         </dt>
 
-        <dd>
+        <dd class="form-control" style="margin-bottom:5px;">
             @Html.DisplayFor(model => model.Fullname)
         </dd>
-
-        <dt>
+        <dt style="margin-bottom:5px;">
             @Html.DisplayNameFor(model => model.LastLoginDate)
         </dt>
 
-        <dd>
+        <dd class="form-control" style="margin-bottom:5px;">
             @Html.DisplayFor(model => model.LastLoginDate)
         </dd>
-
-        <dt>
+        <dt style="margin-bottom:5px;">
+            User Level
+        </dt>
+        @if (Model.IsAdmin)
+        {
+            <dd class="form-control" style="margin-bottom:5px;">Admin User</dd>
+        }
+        else
+        {
+            <dd class="form-control" style="margin-bottom:5px;">Simple User</dd>
+        }
+        <dt style="margin-bottom:5px;">
             @Html.DisplayNameFor(model => model.IsDisabled)
         </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.IsDisabled)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.IsAdmin)
+        @if (Model.IsDisabled)
+        {
+            <dd class="form-control" style="margin-bottom:5px;">True</dd>
+        }
+        else
+        {
+            <dd class="form-control" style="margin-bottom:5px;">False</dd>
+        }
+        <dt style="margin-bottom:5px;">
+            @Html.DisplayNameFor(model => model.CreateDate)
         </dt>
 
-        <dd>
-            @Html.DisplayFor(model => model.IsAdmin)
+        <dd class="form-control" style="margin-bottom:5px;">
+            @Html.DisplayFor(model => model.CreateDate)
         </dd>
 
+        <dt style="margin-bottom:5px;">
+            @Html.DisplayNameFor(model => model.LastModified)
+        </dt>
+
+        <dd class="form-control" style="margin-bottom:5px;">
+            @Html.DisplayFor(model => model.LastModified)
+        </dd>
     </dl>
 </div>
 <p>
-    @Html.ActionLink("Edit", "Edit", new { id = Model.Id }) |
-    @Html.ActionLink("Back to List", "Index")
+    <a href="@Url.Action("Users","Home")" class="btn btn-default">Return</a>
 </p>

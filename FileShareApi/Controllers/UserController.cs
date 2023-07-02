@@ -137,8 +137,8 @@ namespace FileShareApi.Controllers
                     case 4:
                         result.successLogin = true;
                         result.message = "login successfull";
-                        loginResult.Item2.Password = Encryption.MapFromPersistenceToView(loginResult.Item2.Password);
                         result.User = _mapper.EntityMap<UserDTO>(loginResult.Item2);
+                        result.User.Password = Encryption.MapFromPersistenceToView(loginResult.Item2.Password);
                         break;
                     default:
                         result.message = "error not specified";

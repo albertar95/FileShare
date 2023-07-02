@@ -21,13 +21,13 @@ namespace Persistence.Repositories
 
         public Folder GetFolderById(Guid Id)
         {
-            return _context.Folders.ToList().FirstOrDefault(p => p.Id == Id);
+            return _context.Folders.Include("User").ToList().FirstOrDefault(p => p.Id == Id);
         }
 
         public List<Folder> GetFoldersByUserId(Guid UserId, bool IncludePublics = false, bool HasAdminAccess = false, int Skip = 0, int PageSize = 100)
         {
             List<Folder> result = new List<Folder>();
-            var tmpFolders = _context.Folders.ToList();
+            var tmpFolders = _context.Folders.Include("User").ToList();
             result.AddRange(tmpFolders.Where(p => p.UserId == UserId).ToList());
             if (IncludePublics)
                 result.AddRange(tmpFolders.Where(p => p.UserId != UserId && !p.IsProtected && p.IsPublic).ToList());

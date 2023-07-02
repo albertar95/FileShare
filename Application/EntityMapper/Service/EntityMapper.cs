@@ -24,7 +24,8 @@ namespace Application.EntityMapper.Service
                 cfg.CreateMap<User, UpdateUserDTO>();
                 cfg.CreateMap<UpdateUserDTO, User>().BeforeMap((s, d) => { d.LastModified = DateTime.Now; });
                 //folder
-                cfg.CreateMap<Folder, FolderDTO>().ReverseMap();
+                cfg.CreateMap<Folder, FolderDTO>().BeforeMap((s,d) => { d.Username = s.User.Username; });
+                cfg.CreateMap<FolderDTO, Folder>();
                 cfg.CreateMap<Folder, CreateFolderDTO>();
                 cfg.CreateMap<CreateFolderDTO, Folder>().BeforeMap((s, d) => { d.CreateDate = DateTime.Now; d.Id = Guid.NewGuid(); });
                 cfg.CreateMap<Folder, UpdateFolderDTO>();

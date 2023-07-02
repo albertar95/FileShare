@@ -6,6 +6,7 @@ using FileShareWebUI.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
@@ -14,7 +15,7 @@ using System.Web.Security;
 
 namespace FileShareWebUI.Controllers
 {
-    //[Authorize]
+    [Authorize]
     public class HomeController : Controller
     {
         private static string BaseApiAddress = ConfigurationManager.AppSettings["BaseApiAddress"];
@@ -68,9 +69,25 @@ namespace FileShareWebUI.Controllers
 
             return RedirectToAction("Login");
         }
-        public ActionResult Index()
+        public async Task<ActionResult> Index()
         {
-            return View();
+            if (Request.Cookies.AllKeys.Contains("FSCookie"))
+            {
+                var userId = Request.Cookies["FSCookie"].Values["UserId"];
+                var UserLevel = Request.Cookies["FSCookie"].Values["UserLevel"];
+                string curl = "";
+                if (UserLevel == "Admin")
+                    curl = $"{BaseApiAddress}/Folder/GetFoldersByUserId/{userId}?IncludePublics=true&HasAdminAccess=true";
+                else
+                    curl = $"{BaseApiAddress}/Folder/GetFoldersByUserId/{userId}?IncludePublics=true";
+                var result = await ApiHelper.Call(ApiHelper.HttpMethods.Get, curl);
+                if (!result.IsSuccessfulResult())
+                    return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
+                var Content = ApiHelper.Deserialize<List<FolderDTO>>(result.Content);
+                return View(Content);
+            }
+            else
+                return RedirectToAction("Login");
         }
         public async Task<ActionResult> Folders()
         {
@@ -111,6 +128,16 @@ namespace FileShareWebUI.Controllers
         {
             if (Request.Cookies.AllKeys.Contains("FSCookie"))
             {
+                if(folder.IsLocal)
+                {
+                    if (DirectoryHelper.CheckDirectory(folder.Path))
+                    {
+                        TempData["FolderError"] = "path is not exists in server.try again later.";
+                        return RedirectToAction("Folders");
+                    }
+                }
+                else
+                    folder.Path = DirectoryHelper.CreateNewVirtualFolder();
                 folder.UserId = Guid.Parse(Request.Cookies["FSCookie"].Values["UserId"]);
                 var body = ApiHelper.Serialize(folder);
                 var result = await ApiHelper.Call(ApiHelper.HttpMethods.Post, $"{BaseApiAddress}/Folder/Post",body);
@@ -258,13 +285,9 @@ namespace FileShareWebUI.Controllers
                 TempData["UserError"] = "in order to delete user,login first";
             return RedirectToAction("Users");
         }
-        public async Task<ActionResult> UserProfile()
+        public ActionResult UserProfile()
         {
-            var result = await ApiHelper.Call(ApiHelper.HttpMethods.Get, $"");
-            if (!result.IsSuccessfulResult())
-                return RedirectToAction("ErrorHandling", new { Code = result.ResultCode });
-            var Content = ApiHelper.Deserialize<List<FolderDTO>>(result.Content);
-            return View(Content);
+            return View();
         }
         [AllowAnonymous]
         public ActionResult ErrorHandling(int Code = 0)
