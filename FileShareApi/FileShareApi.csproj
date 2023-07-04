@@ -166,6 +166,10 @@
       <Project>{0FE55A62-7452-4A94-8771-E6F160CF4DB0}</Project>
       <Name>Domain</Name>
     </ProjectReference>
+    <ProjectReference Include="..\FileShareWebUI\FileShareWebUI.csproj">
+      <Project>{62754A81-D877-438D-A292-5738C86DC7A4}</Project>
+      <Name>FileShareWebUI</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Persistence\Persistence.csproj">
       <Project>{a1e527d1-cc5e-40fc-980c-d4e50a81ab0f}</Project>
       <Name>Persistence</Name>

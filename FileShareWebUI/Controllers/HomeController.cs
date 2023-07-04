@@ -3,6 +3,7 @@ using Application.DTO.User;
 using Application.Helper;
 using Application.Model;
 using FileShareWebUI.Helpers;
+using FileShareWebUI.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -130,7 +131,7 @@ namespace FileShareWebUI.Controllers
             {
                 if(folder.IsLocal)
                 {
-                    if (DirectoryHelper.CheckDirectory(folder.Path))
+                    if (!DirectoryHelper.CheckDirectory(folder.Path))
                     {
                         TempData["FolderError"] = "path is not exists in server.try again later.";
                         return RedirectToAction("Folders");
@@ -288,6 +289,88 @@ namespace FileShareWebUI.Controllers
         public ActionResult UserProfile()
         {
             return View();
+        }
+        public async Task<ActionResult> Folder(Guid Id)
+        {
+            var result = await ApiHelper.Call(ApiHelper.HttpMethods.Get, $"{BaseApiAddress}/Folder/GetFolderById/{Id}");
+            if (!result.IsSuccessfulResult())
+                return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
+            FolderViewModel fvm = new FolderViewModel();
+            fvm.Folder = ApiHelper.Deserialize<FolderDTO>(result.Content);
+            fvm.Contents = DirectoryHelper.GetFolderContent(fvm.Folder.Path);
+            fvm.ReturnUrl = Url.Action("Index", "Home");
+            return View(fvm);
+        }
+        public async Task<ActionResult> SubFolder(Guid FolderId,string FolderPath)
+        {
+            var result = await ApiHelper.Call(ApiHelper.HttpMethods.Get, $"{BaseApiAddress}/Folder/GetFolderById/{FolderId}");
+            if (!result.IsSuccessfulResult())
+                return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
+            FolderViewModel fvm = new FolderViewModel();
+            fvm.Folder = ApiHelper.Deserialize<FolderDTO>(result.Content);
+            if (FolderPath != fvm.Folder.Path)
+                fvm.ReturnUrl = Url.Action("SubFolder", "Home", new { FolderId = FolderId, FolderPath = Directory.GetParent(FolderPath).FullName });
+            else
+                fvm.ReturnUrl = Url.Action("Index", "Home");
+            fvm.Folder.Path = FolderPath;
+            fvm.Contents = DirectoryHelper.GetFolderContent(fvm.Folder.Path);
+            return View("Folder",fvm);
+        }
+        [HttpPost]
+        public ActionResult AddSubFolder(string FolderName, string RootPath,Guid FolderId)
+        {
+            if(DirectoryHelper.CreateNewFolder(Path.Combine(RootPath, FolderName)))
+                TempData["FolderPageSuccess"] = "folder created successfully";
+            else
+                TempData["FolderPageError"] = "error occured in creating folder";
+            return RedirectToAction("SubFolder", new { FolderId = FolderId, FolderPath = RootPath });
+        }
+        [HttpPost]
+        public ActionResult UploadFile(HttpPostedFileBase FileUpload,string RootPath,Guid FolderId)
+        {
+            try
+            {
+                if (FileUpload.ContentLength > 0)
+                {
+                    string FileName = Path.GetFileName(FileUpload.FileName);
+                    string path = Path.Combine(RootPath, FileName);
+                    FileUpload.SaveAs(path);
+                    TempData["FolderPageSuccess"] = "file uploaded successfully";
+                }
+            }
+            catch
+            {
+                TempData["FolderPageError"] = "error occured in uploading file";
+            }
+            return RedirectToAction("SubFolder", new { FolderId = FolderId, FolderPath = RootPath });
+        }
+        public ActionResult DownloadFile(string FilePath)
+        {
+            byte[] fileBytes = System.IO.File.ReadAllBytes(FilePath);
+            string fileName = Path.GetFileName(FilePath);
+            return File(fileBytes, System.Net.Mime.MediaTypeNames.Application.Octet, fileName);
+        }
+        public ActionResult ViewFile(string FilePath)
+        {
+            switch (DirectoryHelper.GetFileType(FilePath))
+            {
+                case FileContentType.Picture:
+                    return View("PictureViewer");
+                case FileContentType.Movie:
+                    return View("MovieViewer");
+                case FileContentType.Pdf:
+                    return View("PdfViewer");
+                case FileContentType.Doc:
+                    return View("DocViewer");
+                case FileContentType.Compress:
+                    byte[] fileBytes = System.IO.File.ReadAllBytes(FilePath);
+                    string fileName = Path.GetFileName(FilePath);
+                    return File(fileBytes, System.Net.Mime.MediaTypeNames.Application.Octet, fileName);
+                case FileContentType.Unknown:
+                    return RedirectToAction("ErrorHandling");
+                default:
+                    return RedirectToAction("ErrorHandling");
+            }
         }
         [AllowAnonymous]
         public ActionResult ErrorHandling(int Code = 0)

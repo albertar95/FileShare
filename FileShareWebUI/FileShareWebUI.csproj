@@ -132,6 +132,7 @@
     <Compile Include="Helpers\EncryptionHelper.cs" />
     <Compile Include="Helpers\ViewHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ViewModels\FolderViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\web.config" />
@@ -157,6 +158,11 @@
     <Content Include="Views\Home\AddUser.cshtml" />
     <Content Include="Views\Home\EditUser.cshtml" />
     <Content Include="Views\Home\UserDetail.cshtml" />
+    <Content Include="Views\Home\Folder.cshtml" />
+    <Content Include="Views\Home\PictureViewer.cshtml" />
+    <Content Include="Views\Home\MovieViewer.cshtml" />
+    <Content Include="Views\Home\PdfViewer.cshtml" />
+    <Content Include="Views\Home\DocViewer.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
