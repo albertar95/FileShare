@@ -350,18 +350,31 @@ namespace FileShareWebUI.Controllers
             string fileName = Path.GetFileName(FilePath);
             return File(fileBytes, System.Net.Mime.MediaTypeNames.Application.Octet, fileName);
         }
-        public ActionResult ViewFile(string FilePath)
+        public ActionResult ViewFile(string FilePath, Guid FolderId)
         {
             switch (DirectoryHelper.GetFileType(FilePath))
             {
                 case FileContentType.Picture:
-                    return View("PictureViewer");
-                case FileContentType.Movie:
-                    return View("MovieViewer");
+                    return View("DocViewer", "", new List<string>() { "files\\\\demo.jpg"
+                        , Url.Action("SubFolder", "Home", new { FolderId = FolderId, FolderPath = Directory.GetParent(FilePath).FullName }).ToString() });
+                case FileContentType.Video:
+                    return View("MovieViewer", "", new List<string>() { "files\\\\demo.mp4"
+                        , Url.Action("SubFolder", "Home", new { FolderId = FolderId, FolderPath = Directory.GetParent(FilePath).FullName }).ToString() });
                 case FileContentType.Pdf:
-                    return View("PdfViewer");
+                    return View("DocViewer", "", new List<string>() { "files\\\\demo.pdf"
+                        , Url.Action("SubFolder", "Home", new { FolderId = FolderId, FolderPath = Directory.GetParent(FilePath).FullName }).ToString() });
                 case FileContentType.Doc:
-                    return View("DocViewer");
+                    return View("DocViewer","", new List<string>() { "files\\\\demo.docx"
+                        , Url.Action("SubFolder", "Home", new { FolderId = FolderId, FolderPath = Directory.GetParent(FilePath).FullName }).ToString() });
+                case FileContentType.Audio:
+                    return View("AudioViewer", "", new List<string>() { "files\\\\demo.mp3"
+                        , Url.Action("SubFolder", "Home", new { FolderId = FolderId, FolderPath = Directory.GetParent(FilePath).FullName }).ToString() });
+                case FileContentType.SpreadSheet:
+                    return View("DocViewer", "", new List<string>() { "files\\\\demo.xlsx"
+                        , Url.Action("SubFolder", "Home", new { FolderId = FolderId, FolderPath = Directory.GetParent(FilePath).FullName }).ToString() });
+                case FileContentType.Presentation:
+                    return View("DocViewer", "", new List<string>() { "files\\\\demo.pptx"
+                        , Url.Action("SubFolder", "Home", new { FolderId = FolderId, FolderPath = Directory.GetParent(FilePath).FullName }).ToString() });
                 case FileContentType.Compress:
                     byte[] fileBytes = System.IO.File.ReadAllBytes(FilePath);
                     string fileName = Path.GetFileName(FilePath);

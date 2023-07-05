@@ -11,9 +11,12 @@ namespace FileShareWebUI.Helpers
     {
         private static string RootVirtualFoldersAddr = ConfigurationManager.AppSettings["RootVirtualFolders"];
         private static List<string> PictureExts = new List<string>() { ".jpg", ".png",".gif" };
-        private static List<string> MovieExts = new List<string>() { ".mp4", ".mov", ".flv", ".ts" };
+        private static List<string> VideoExts = new List<string>() { ".mp4", ".mov", ".flv", ".ts" };
         private static List<string> PdfExts = new List<string>() { ".pdf" };
         private static List<string> DocExts = new List<string>() { ".doc", ".docx" };
+        private static List<string> SpreadSheetExts = new List<string>() { ".xls", ".xlsx" };
+        private static List<string> PresentationExts = new List<string>() { ".ppt", ".pptx" };
+        private static List<string> AudioExts = new List<string>() { ".mp3", ".wav" };
         private static List<string> CompressExts = new List<string>() { ".zip", ".rar", ".7z" };
         public static bool CheckDirectory(string path)
         {
@@ -50,12 +53,18 @@ namespace FileShareWebUI.Helpers
             var ext = Path.GetExtension(FilePath).ToLower();
             if (PictureExts.Contains(ext))
                 return FileContentType.Picture;
-            else if (MovieExts.Contains(ext))
-                return FileContentType.Movie;
+            else if (VideoExts.Contains(ext))
+                return FileContentType.Video;
             else if (PdfExts.Contains(ext))
                 return FileContentType.Pdf;
             else if (DocExts.Contains(ext))
                 return FileContentType.Doc;
+            else if (AudioExts.Contains(ext))
+                return FileContentType.Audio;
+            else if (SpreadSheetExts.Contains(ext))
+                return FileContentType.SpreadSheet;
+            else if (PresentationExts.Contains(ext))
+                return FileContentType.Presentation;
             else if (CompressExts.Contains(ext))
                 return FileContentType.Compress;
             else
@@ -70,5 +79,5 @@ namespace FileShareWebUI.Helpers
         public string Format { get; set; }
     }
     public enum FolderContentType { File = 1,Folder = 2 }
-    public enum FileContentType { Picture = 1,Movie = 2,Pdf = 3,Doc = 4,Compress = 5, Unknown = 0 }
+    public enum FileContentType { Picture = 1,Video = 2,Pdf = 3,Doc = 4,Compress = 5,Audio = 6,SpreadSheet = 7,Presentation = 8, Unknown = 0 }
 }
