@@ -1,0 +1,57 @@
+<div class="row" style="display:flex;">
+  <div class="col-md-3">
+    <a style="margin:10px;" [routerLink]="['/folders/add']" class="btn btn-success"><i class="fa fa-plus"></i> add </a>
+  </div>
+  <div class="col-md-9">
+    <div class="alert alert-success alert-dismissable" id="divSuccess" [ngClass]="{displayNone : showSuccess === false }">
+      <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+      <p>{{ txtSuccess }}</p>
+    </div>
+    <div class="alert alert-danger alert-dismissable" [ngClass]="{displayNone : showError === false }">
+      <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+      <p>{{ txtError }}</p>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-12">
+    <!-- Advanced Tables -->
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        Folders Created By
+      </div>
+      <div class="panel-body">
+        <div class="table-responsive">
+          <table class="table table-striped table-bordered table-hover" id="dataTables-example">
+            <thead>
+              <tr>
+                <th style="text-align:center;">Title</th>
+                <th style="text-align:center;">Folder Type</th>
+                <th style="text-align:center;">Privacy Level</th>
+                <th style="text-align:center;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="odd gradeA" *ngFor="let fld of folderList">
+                <td style="text-align:center;">{{fld.Title}}</td>
+                <td style="text-align:center;" *ngIf="fld.IsLocal">Local</td>
+                <td style="text-align:center;" *ngIf="!fld.IsLocal">Virtual</td>
+                <td style="text-align:center;" *ngIf="fld.IsProtected">Protected</td>
+                <td style="text-align:center;" *ngIf="!fld.IsProtected && IsPublic">Public</td>
+                <td style="text-align:center;" *ngIf="!fld.IsProtected && !IsPublic">Private</td>
+                <td style="text-align:center;">
+                  <a [routerLink]="['/folders', fld.Id, 'edit']" class="btn btn-warning btn-margins"><i class="fa fa-pencil"></i></a>
+                  <a (click)="DeleteFolderEvent(fld.Id,fld.Title)" class="btn btn-danger btn-margins"><i class="fa fa-trash-o"></i></a>
+                  <a [routerLink]="['/folders', fld.Id, 'detail']" class="btn btn-info btn-margins"><i class="fa fa-info"></i></a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+    <!--End Advanced Tables -->
+  </div>
+</div>

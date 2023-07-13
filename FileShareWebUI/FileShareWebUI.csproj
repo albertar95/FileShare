@@ -467,7 +467,6 @@
     <Content Include="Views\Home\Folder.cshtml" />
     <Content Include="Views\Home\MovieViewer.cshtml" />
     <Content Include="Views\Home\DocViewer.cshtml" />
-    <Content Include="Views\Home\AudioViewer.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

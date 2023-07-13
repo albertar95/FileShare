@@ -1,0 +1,26 @@
+<h2>Edit Folder</h2>
+<form (ngSubmit)="FormSubmit()" #Frm="ngForm">
+  <div class="form-horizontal">
+    <div class="form-group">
+      <label class="control-label col-md-2">Title</label>
+      <div class="col-md-10">
+        <input type="text" id="Title" name="Title" class="form-control frmInp" ngModel autofocus />
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="control-label col-md-2" for="IsPublic">Is Public</label>
+      <input class="checkbox ckbx" id="IsPublic" name="IsPublic" type="checkbox" ngModel value="false">
+    </div>
+    <div class="form-group">
+      <label class="control-label col-md-2" for="IsAdmin">Is Protected</label>
+      <input class="checkbox ckbx" id="IsProtected" name="IsProtected" type="checkbox" ngModel value="false">
+    </div>
+
+    <div class="form-group">
+      <div class="col-md-offset-2 col-md-10">
+        <input type="submit" value="Update Folder" class="btn btn-warning" style="margin:15px;" />
+        <a href="#" class="btn btn-default">Return</a>
+      </div>
+    </div>
+  </div>
+</form>

@@ -1,0 +1,73 @@
+<div class="row" style="display:flex;">
+  <div class="col-md-3">
+    <a style="margin:10px;" class="btn btn-success" [routerLink]="['/users/add']"><i class="fa fa-plus"></i> add </a>
+  </div>
+  <div class="col-md-9">
+    <div class="alert alert-success alert-dismissable" id="divSuccess" hidden>
+      <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+      <p id="txtSuccess"></p>
+    </div>
+    <div class="alert alert-danger alert-dismissable" id="divError" hidden>
+      <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+      <p id="txtError"></p>
+    </div>
+  </div>
+</div>
+<div class="row">
+  <div class="col-md-12">
+    <!-- Advanced Tables -->
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        Users
+      </div>
+      <div class="panel-body">
+        <div class="table-responsive">
+          <table class="table table-striped table-bordered table-hover" id="dataTables-example">
+            <thead>
+              <tr>
+                <th style="text-align:center;">Username</th>
+                <th style="text-align:center;">Fullname</th>
+                <th style="text-align:center;">Access Level</th>
+                <th style="text-align:center;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="odd gradeA" *ngFor="let usr of userList">
+                <td style="text-align:center;">{{ usr.Username }}</td>
+                <td style="text-align:center;">{{ usr.Fullname }}</td>
+                <td style="text-align:center;" *ngIf="usr.IsAdmin">Admin User</td>
+                <td style="text-align:center;" *ngIf="!usr.IsAdmin">Simple User</td>
+                <td style="text-align:center;">
+                  <a [routerLink]="['/users', usr.Id, 'edit']"
+                     class="btn btn-warning btn-margins"><i class="fa fa-pencil"></i></a>
+                  <a (click)="DeleteUserEvent(usr.Id,usr.Username)" class="btn btn-danger btn-margins"><i class="fa fa-trash-o"></i></a>
+                  <a [routerLink]="['/users', usr.Id, 'detail']" class="btn btn-info btn-margins"><i class="fa fa-info"></i></a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+    <!--End Advanced Tables -->
+  </div>
+</div>
+<div class="modal fade" id="DeleteModal" tabindex="-1" role="dialog" aria-labelledby="DeleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="myModalLabel">Delete User</h4>
+      </div>
+      <div class="modal-body">
+        are you sure to delete this user?
+        folder name : <p id="txtUserName"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <a href="" id="btnDeleteUser" type="button" class="btn btn-danger">Delete it!</a>
+      </div>
+    </div>
+  </div>
+</div>
