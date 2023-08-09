@@ -30,7 +30,7 @@ namespace FileShareWebUI.Controllers
         [AllowAnonymous]
         public async Task<ActionResult> SubmitLogin(LoginCredential credential)
         {
-            credential.Password = Encryption.EncryptStringView(credential.Password);
+            credential.Password = Application.Helper.EncryptionHelper.EncryptStringView(credential.Password);
             var body = ApiHelper.Serialize(credential);
             var result = await ApiHelper.Call(ApiHelper.HttpMethods.Post, $"{BaseApiAddress}/User/LoginUser",body);
             if (!result.IsSuccessfulResult())
@@ -221,7 +221,7 @@ namespace FileShareWebUI.Controllers
             {
                 if (Request.Cookies["FSCookie"].Values["UserLevel"] == "Admin")
                 {
-                    user.Password = Encryption.EncryptStringView(user.Password.Trim());
+                    user.Password = Application.Helper.EncryptionHelper.EncryptStringView(user.Password.Trim());
                     var body = ApiHelper.Serialize(user);
                     var result = await ApiHelper.Call(ApiHelper.HttpMethods.Post, $"{BaseApiAddress}/User/Post", body);
                     if (!result.IsSuccessfulResult())
@@ -245,7 +245,7 @@ namespace FileShareWebUI.Controllers
             {
                 if (Request.Cookies["FSCookie"].Values["UserLevel"] == "Admin")
                 {
-                    user.Password = Encryption.EncryptStringView(user.Password.Trim());
+                    user.Password = Application.Helper.EncryptionHelper.EncryptStringView(user.Password.Trim());
                     var body = ApiHelper.Serialize(user);
                     var result = await ApiHelper.Call(ApiHelper.HttpMethods.Post, $"{BaseApiAddress}/User/Patch", body);
                     if (!result.IsSuccessfulResult())

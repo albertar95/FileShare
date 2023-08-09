@@ -1,14 +1,16 @@
 ﻿using Application.DTO.User;
-using Application.EntityMapper.Contract;
 using Application.Helper;
 using Application.Model;
 using Application.Persistence;
+using Application.Service.EntityMapper;
 using Domain;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 using System.Web.Http;
 
@@ -19,17 +21,19 @@ namespace FileShareApi.Controllers
     {
         private readonly IEntityMapper _mapper;
         private readonly IUserRepository _userRepository;
-        public UserController(IUserRepository userRepository, IEntityMapper mapper)
+        private readonly IEncryptionHelper _encryptionHelper;
+        public UserController(IUserRepository userRepository, IEntityMapper mapper,IEncryptionHelper encryptionHelper)
         {
             _userRepository = userRepository;
             _mapper = mapper;
+            _encryptionHelper = encryptionHelper;
         }
         [HttpPost]
         public async Task<IHttpActionResult> Post([FromBody] CreateUserDTO user)
         {
             try
             {
-                user.Password = Encryption.MapFromViewToPersistence(user.Password);
+                user.Password = _encryptionHelper.EncryptString(user.Password);
                 return Ok(await _userRepository.Add(_mapper.EntityMap<Domain.User>(user)));
             }
             catch (Exception ex)
@@ -46,7 +50,7 @@ namespace FileShareApi.Controllers
                 if (Currentuser == null) return NotFound();
                 else
                 {
-                    user.Password = Encryption.MapFromViewToPersistence(user.Password);
+                    user.Password = _encryptionHelper.EncryptString(user.Password);
                     Currentuser = _mapper.EntityMap<User>(user, Currentuser);
                     if (await _userRepository.Update(Currentuser))
                         return Ok(true);
@@ -84,14 +88,7 @@ namespace FileShareApi.Controllers
         {
             try
             {
-                var result = new List<UserDTO>();
-                var users = _userRepository.GetUsers(IncludeDisabled, Skip, PageSize).ToList();
-                foreach (var usr in users)
-                {
-                    result.Add(_mapper.EntityMap<UserDTO>(usr));
-                }
-                result.ForEach(p => { p.Password = Encryption.MapFromPersistenceToView(p.Password); });
-                return Ok(result);
+                return Ok(_mapper.EntityMap<List<UserDTO>>(_userRepository.GetUsers(IncludeDisabled, Skip, PageSize).ToList()));
             }
             catch (Exception ex)
             {
@@ -99,15 +96,15 @@ namespace FileShareApi.Controllers
             }
         }
         [HttpGet]
-        [Route("GetUserById/{UserId}")]
-        public IHttpActionResult GetUserById(Guid UserId)
+        public IHttpActionResult GetUserById(Guid id)
         {
             try
             {
                 var result = new UserDTO();
-                var user = _userRepository.GetUserById(UserId);
+                var user = _userRepository.GetUserById(id);
+                user.Password = _encryptionHelper.DecryptString(user.Password);
+                user.Password = Convert.ToBase64String(Encoding.UTF8.GetBytes(user.Password));
                 result = _mapper.EntityMap<UserDTO>(user);
-                result.Password = Encryption.MapFromPersistenceToView(user.Password);
                 return Ok(result);
             }
             catch (Exception ex)
@@ -120,7 +117,7 @@ namespace FileShareApi.Controllers
         {
             try
             {
-                user.Password = Encryption.MapFromViewToPersistence(user.Password);
+                user.Password = _encryptionHelper.EncryptString(user.Password);
                 var loginResult = _userRepository.LoginUser(user.Username, user.Password);
                 LoginResult result = new LoginResult() {  successLogin = false, User = null };
                 switch (loginResult.Item1)
@@ -138,7 +135,6 @@ namespace FileShareApi.Controllers
                         result.successLogin = true;
                         result.message = "login successfull";
                         result.User = _mapper.EntityMap<UserDTO>(loginResult.Item2);
-                        result.User.Password = Encryption.MapFromPersistenceToView(loginResult.Item2.Password);
                         break;
                     default:
                         result.message = "error not specified";

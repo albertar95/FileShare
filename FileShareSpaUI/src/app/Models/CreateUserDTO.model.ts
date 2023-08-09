@@ -9,7 +9,13 @@ export class CreateUserDTO {
     this.Username = username;
     this.Password = password;
     this.Fullname = fullname;
-    this.IsDisabled = isdisabled;
-    this.IsAdmin = isadmin;
+    if (isdisabled)
+      this.IsDisabled = isdisabled;
+    else
+      this.IsDisabled = false;
+    if (isadmin)
+      this.IsAdmin = isadmin;
+    else
+      this.IsAdmin = false;
   }
 }

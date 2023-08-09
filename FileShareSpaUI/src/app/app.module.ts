@@ -15,6 +15,7 @@ import { RouteConfig } from './RouteConfig.Route';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { FolderDetailComponentComponent } from './Folders/folder-detail-component/folder-detail-component.component';
 import { UserDetailComponentComponent } from './Users/user-detail-component/user-detail-component.component';
+import { LoginComponent } from './login/login.component';
 @NgModule({
   declarations: [
     AppComponent,
@@ -28,7 +29,8 @@ import { UserDetailComponentComponent } from './Users/user-detail-component/user
     DashboardComponentComponent,
     MyProfileComponentComponent,
     FolderDetailComponentComponent,
-    UserDetailComponentComponent
+    UserDetailComponentComponent,
+    LoginComponent
   ],
   imports: [
     BrowserModule,

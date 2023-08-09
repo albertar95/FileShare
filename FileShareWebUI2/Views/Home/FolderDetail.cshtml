@@ -1,0 +1,81 @@
+﻿@model Application.DTO.Folder.FolderDTO
+
+@{
+    ViewBag.Title = "FolderDetail";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Folder Detail</h2>
+
+<div>
+    <dl class="dl-horizontal">
+        <dt style="margin-bottom:5px;">
+            @Html.DisplayNameFor(model => model.Title)
+        </dt>
+
+        <dd class="form-control" style="margin-bottom:5px;">
+            @Html.DisplayFor(model => model.Title)
+        </dd>
+        <dt style="margin-bottom:5px;">
+            Folder Type
+        </dt>
+        @if (Model.IsLocal)
+        {
+            <dd class="form-control" style="margin-bottom:5px;">Local</dd>
+        }
+        else
+        {
+            <dd class="form-control" style="margin-bottom:5px;">Virtual</dd>
+        }
+        <dt style="margin-bottom:5px;">
+            Access Level
+        </dt>
+        @if (Model.IsPublic)
+        {
+            <dd class="form-control" style="margin-bottom:5px;">Public</dd>
+        }
+        else
+        {
+            <dd class="form-control" style="margin-bottom:5px;">Private</dd>
+        }
+        <dt style="margin-bottom:5px;">
+            @Html.DisplayNameFor(model => model.IsProtected)
+        </dt>
+        @if (Model.IsProtected)
+        {
+            <dd class="form-control" style="margin-bottom:5px;">True</dd>
+        }
+        else
+        {
+            <dd class="form-control" style="margin-bottom:5px;">False</dd>
+        }
+        <dt style="margin-bottom:5px;">
+            @Html.DisplayNameFor(model => model.CreateDate)
+        </dt>
+
+        <dd class="form-control" style="margin-bottom:5px;">
+            @Html.DisplayFor(model => model.CreateDate)
+        </dd>
+
+        <dt style="margin-bottom:5px;">
+            @Html.DisplayNameFor(model => model.LastModified)
+        </dt>
+
+        <dd class="form-control" style="margin-bottom:5px;">
+            @Html.DisplayFor(model => model.LastModified)
+        </dd>
+        @if (Model.IsLocal)
+        {
+            <dt style="margin-bottom:5px;">
+                @Html.DisplayNameFor(model => model.Path)
+            </dt>
+
+            <dd class="form-control" style="margin-bottom:5px;">
+                @Html.DisplayFor(model => model.Path)
+            </dd>
+        }
+    </dl>
+</div>
+<p>
+    <a href="@Url.Action("Folders","Home")" class="btn btn-default">Return</a>
+</p>

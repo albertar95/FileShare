@@ -1,13 +1,11 @@
 ﻿using Application.DTO.Folder;
-using Application.EntityMapper.Contract;
+using Application.Helpers;
 using Application.Persistence;
+using Application.Service.EntityMapper;
 using Domain;
-using MediatR;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
+using System.Configuration;
 using System.Threading.Tasks;
 using System.Web.Http;
 
@@ -18,17 +16,33 @@ namespace FileShareApi.Controllers
     {
         private readonly IEntityMapper _mapper;
         private readonly IFolderRepository _folderRepository;
-        public FolderController(IFolderRepository folderRepository,IEntityMapper mapper)
+        private readonly IDirectoryHelper _directoryHelper;
+        public FolderController(IFolderRepository folderRepository,IEntityMapper mapper,IDirectoryHelper directoryHelper)
         {
             _folderRepository = folderRepository;
             _mapper = mapper;
+            _directoryHelper = directoryHelper;
         }
         [HttpPost]
         public async Task<IHttpActionResult> Post([FromBody] CreateFolderDTO folder)
         {
             try
             {
-                return Ok(await _folderRepository.Add(_mapper.EntityMap<Domain.Folder>(folder)));
+                folder.Id = Guid.NewGuid();
+                if (folder.IsLocal)
+                {
+                    if (!_directoryHelper.CheckDirectory(folder.Path))
+                        return InternalServerError(new Exception("folder path not exists."));
+                }
+                else
+                    folder.Path = $"{ConfigurationManager.AppSettings["RootVirtualFolders"]}\\{folder.Id}";
+                if (_directoryHelper.CreateFolder(folder.Path, folder.Id.ToString(), folder.IsLocal))
+                {
+                    folder.VirtualPath = $"http://{ConfigurationManager.AppSettings["ServerIp"]}/FS/{folder.Id}";
+                    return Ok(await _folderRepository.Add(_mapper.EntityMap<Domain.Folder>(folder)));
+                }
+                else
+                    return InternalServerError(new Exception("error in creating folder or virtual directory"));
             }
             catch (Exception ex)
             {
@@ -68,17 +82,9 @@ namespace FileShareApi.Controllers
                     var result = await _folderRepository.Delete(folder);
                     if (result)
                     {
-                        try
-                        {
-                            if (!folder.IsLocal)
-                                System.IO.Directory.Delete(folder.Path);
-                        }
-                        catch (Exception)
-                        {
-                        }
-                    }
-                    if (result)
+                        _directoryHelper.RemoveFolder(folder.Path, folder.VirtualPath, folder.IsLocal);
                         return Ok(true);
+                    }
                     else
                         return InternalServerError();
                 }
@@ -108,6 +114,20 @@ namespace FileShareApi.Controllers
             try
             {
                 return Ok(_mapper.EntityMap<FolderDTO>(_folderRepository.GetFolderById(FolderId)));
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
+            }
+        }
+        [HttpGet]
+        [Route("GetFolderContentTreeById/{FolderId}")]
+        public IHttpActionResult GetFolderContentTreeById(Guid FolderId)
+        {
+            try
+            {
+                var tmpFolder = _mapper.EntityMap<FolderDTO>(_folderRepository.GetFolderById(FolderId));
+                return Ok();
             }
             catch (Exception ex)
             {

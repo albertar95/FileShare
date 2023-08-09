@@ -9,9 +9,18 @@ export class CreateFolderDTO {
     , path: string, userid: string)
   {
     this.Title = title;
-    this.IsLocal = islocal;
-    this.IsPublic = ispublic;
-    this.IsProtected = isprotected;
+    if (islocal)
+      this.IsLocal = islocal;
+    else
+      this.IsLocal = false;
+    if (ispublic)
+      this.IsPublic = ispublic;
+    else
+      this.IsPublic = false;
+    if (isprotected)
+      this.IsProtected = isprotected;
+    else
+      this.IsProtected = false;
     this.Path = path;
     this.UserId = userid;
   }

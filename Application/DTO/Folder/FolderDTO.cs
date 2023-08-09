@@ -16,6 +16,7 @@ namespace Application.DTO.Folder
         public bool IsPublic { get; set; }
         public bool IsProtected { get; set; }
         public string Path { get; set; }
+        public string VirtualPath { get; set; }
         public Guid UserId { get; set; }
         public string Username { get; set; }
     }

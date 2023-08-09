@@ -1,0 +1,59 @@
+﻿@model List<string>
+@{
+    ViewBag.Title = "DocViewer";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="row" style="margin:10px 10px 25px 10px;">
+    <a href="@Model.Last()" class="btn btn-default"><i class="fa fa-arrow-circle-o-left"></i> Return</a>
+    <a href="#" class="btn btn-primary">Download</a>
+</div>
+<div id="resolte-contaniner" style="width: 100%; height:550px; overflow: auto;"></div>
+<script>
+    (function ($) {
+                    $("#resolte-contaniner").officeToHtml({
+                url: '@Model.First()',
+                pdfSetting: {
+                    setLang: "",
+                    setLangFilesPath: "" /*"include/pdf/lang/locale" - relative to app path*/
+                }
+            });
+    }(jQuery));
+</script>
+
+@section Styles
+    {
+    <link rel="stylesheet" href="@Url.Content("~/Content/assets/vendor/OfficeJS/jquery_ui/themes/start/jquery-ui.min.css")">
+    <script src="@Url.Content("~/Content/assets/vendor/OfficeJS/jquery/jquery-1.12.4.min.js")"></script>
+    <script src="@Url.Content("~/Content/assets/vendor/OfficeJS/jquery_ui/jquery-ui.min.js")"></script>
+    <!--PDF-->
+    <link rel="stylesheet" href="@Url.Content("~/Content/assets/vendor/OfficeJS/pdf/pdf.viewer.css")">
+    <script src="@Url.Content("~/Content/assets/vendor/OfficeJS/pdf/pdf.js")"></script>
+    <!--Docs-->
+    <script src="@Url.Content("~/Content/assets/vendor/OfficeJS/docx/jszip-utils.js")"></script>
+    <script src="@Url.Content("~/Content/assets/vendor/OfficeJS/docx/mammoth.browser.min.js")"></script>
+    <!--PPTX-->
+    <link rel="stylesheet" href="@Url.Content("~/Content/assets/vendor/OfficeJS/PPTXjs/css/pptxjs.css")">
+    <link rel="stylesheet" href="@Url.Content("~/Content/assets/vendor/OfficeJS/PPTXjs/css/nv.d3.min.css")">
+    <!-- optional if you want to use revealjs (v1.11.0) -->
+    <link rel="stylesheet" href="./revealjs/reveal.css">
+    <script type="text/javascript" src="@Url.Content("~/Content/assets/vendor/OfficeJS/PPTXjs/js/filereader.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Content/assets/vendor/OfficeJS/PPTXjs/js/d3.min.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Content/assets/vendor/OfficeJS/PPTXjs/js/nv.d3.min.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Content/assets/vendor/OfficeJS/PPTXjs/js/pptxjs.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Content/assets/vendor/OfficeJS/PPTXjs/js/divs2slides.js")"></script>
+
+    <!--All Spreadsheet -->
+    <link rel="stylesheet" href="@Url.Content("~/Content/assets/vendor/OfficeJS/SheetJS/handsontable.full.min.css")">
+    <script type="text/javascript" src="@Url.Content("~/Content/assets/vendor/OfficeJS/SheetJS/handsontable.full.min.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Content/assets/vendor/OfficeJS/SheetJS/xlsx.full.min.js")"></script>
+    <!--Image viewer-->
+    <link rel="stylesheet" href="@Url.Content("~/Content/assets/vendor/OfficeJS/verySimpleImageViewer/css/jquery.verySimpleImageViewer.css")">
+    <script type="text/javascript" src="@Url.Content("~/Content/assets/vendor/OfficeJS/verySimpleImageViewer/js/jquery.verySimpleImageViewer.js")"></script>
+    <!--officeToHtml-->
+    <script src="@Url.Content("~/Content/assets/vendor/OfficeJS/officeToHtml/officeToHtml.js")"></script>
+    <link rel="stylesheet" href="@Url.Content("~/Content/assets/vendor/OfficeJS/officeToHtml/officeToHtml.css")">
+}
+
+
+
+

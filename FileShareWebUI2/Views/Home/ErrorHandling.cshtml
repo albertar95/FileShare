@@ -1,0 +1,65 @@
+﻿@model int
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Http Error</title>
+    <link href="@Url.Content("~/Content/assets/css/ErrorHandle.css")" rel="stylesheet" />
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-2"></div>
+            <div class="col-lg-8">
+                <div class="col-lg-12 text-404">
+                    <b>@Model</b>
+                </div>
+                <div class="col-lg-12 text">
+                    @switch (Model)
+                    {
+                        case 400:
+                            <b> BAD REQUEST </b>
+                            break;
+                        case 401:
+                            <b> UNAUTHORIZED </b>
+                            break;
+                        case 403:
+                            <b> FORBIDDEN </b>
+                            break;
+                        case 404:
+                            <b> NOT FOUND </b>
+                            break;
+                        case 405:
+                            <b> METHOD NOT ALLOWED </b>
+                            break;
+                        case 500:
+                            <b> INTERNAL SERVER ERROR </b>
+                            break;
+                        case 502:
+                            <b> BAD GATEWAY </b>
+                            break;
+                        case 503:
+                            <b> SERVICE UNABAILABLE </b>
+                            break;
+                        case 0:
+                            <b> ERROR HANDLING PAGE CALLED WITHOUT CODE </b>
+                            break;
+                        default:
+                            <b> HTTP ERROR OCCURED </b>
+                            break;
+                    }
+                </div>
+                <div class="col-lg-12 text-btn">
+                    <a href="/" class="btn btn-outline-primary">BACK TO HOME</a>
+                </div>
+            </div>
+            <div class="col-lg-2"></div>
+        </div>
+    </div>
+</body>
+</html>

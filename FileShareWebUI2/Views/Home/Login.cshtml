@@ -1,0 +1,40 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Login</title>
+    <link href="@Url.Content("~/Content/assets/css/Login.css")" rel="stylesheet" />
+</head>
+<body>
+    <form class="login" method="post" action="SubmitLogin">
+        <h2>Welcome, User!</h2>
+        <p>Please log in</p>
+        <input type="text" name="Username" placeholder="User Name" autofocus />
+        <input type="password" name="Password" placeholder="Password" />
+        <input type="submit" value="Log In" />
+        <div class="links">
+            <p id="ErrorMessage" style="color:palevioletred;font-weight:bold;" hidden></p>
+        </div>
+    </form>
+    <script src="@Url.Content("~/Content/assets/js/jquery-1.10.2.js")"></script>
+    <script type="text/javascript">
+        $(function ()
+        {
+            if ('@TempData["LoginError"]' != "") {
+                $("#ErrorMessage").text('error : ' + '@TempData["LoginError"]');
+                $("#ErrorMessage").removeAttr('hidden');
+                window.setTimeout(function ()
+                {
+                    $("#ErrorMessage").attr('hidden', 'hidden');
+                }, 10000);
+            }
+        });
+    </script>
+</body>
+</html>

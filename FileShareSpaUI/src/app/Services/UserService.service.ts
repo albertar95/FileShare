@@ -11,6 +11,7 @@ import { LoginResult } from "../Models/LoginResult.model";
 @Injectable({ providedIn: 'root' })
 export class UserService {
   private baseApiUrl: string = environment.baseApiUrl;
+  public tmpPassword: string = "";
   httpOptions = {
     headers: new HttpHeaders({
       'Content-Type': 'application/json',
@@ -18,10 +19,10 @@ export class UserService {
   };
   constructor(private http: HttpClient) { }
   add(user: CreateUserDTO): Observable<boolean> {
-    return this.http.post<boolean>(this.baseApiUrl + '/User/Post', JSON.stringify(user), this.httpOptions);
+    return this.http.post<boolean>(this.baseApiUrl + '/User/PostWithRawPassword', JSON.stringify(user), this.httpOptions);
   }
   update(user: UpdateUserDTO): Observable<boolean> {
-    return this.http.post<boolean>(this.baseApiUrl + '/User/Patch', JSON.stringify(user), this.httpOptions);
+    return this.http.post<boolean>(this.baseApiUrl + '/User/PatchWithRawPassword', JSON.stringify(user), this.httpOptions);
   }
   delete(userId: string): Observable<boolean> {
     return this.http.delete<boolean>(this.baseApiUrl + '/User/Delete/' + userId, this.httpOptions);
@@ -31,7 +32,7 @@ export class UserService {
       .then(response => response as User[]);
   }
   get(userId: string): Promise<User> {
-    return this.http.get<User>(this.baseApiUrl + '/User/GetUserById/' + userId, this.httpOptions).toPromise();
+    return this.http.get<User>(this.baseApiUrl + '/User/GetUserById/' + userId + '/rawPassword', this.httpOptions).toPromise();
   }
   login(credentials: LoginCredential): Promise<LoginResult>
   {

@@ -1,4 +1,5 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Router } from '@angular/router';
 import { Folder } from '../../Models/Folder.model';
 import { FolderService } from '../../Services/FolderService.service';
 
@@ -17,7 +18,7 @@ export class FoldersComponentComponent implements OnInit {
   showError = false;
   txtSuccess: string = '';
   txtError: string = '';
-  constructor(private folderService: FolderService) { }
+  constructor(private folderService: FolderService, private router: Router) { }
 
   ngOnInit(): void {
     this.folderService.list(this.userIdTest).then(result => { this.folderList = result });
@@ -31,17 +32,18 @@ export class FoldersComponentComponent implements OnInit {
   submitDeleteFolder()
   {
     let submitResult: boolean = false;
-    this.folderService.delete(this.CurrentFolderId).subscribe(result => { submitResult = result });
-    if (submitResult) {
-      this.txtSuccess = 'folder deleted successfully';
-      this.showSuccess = true;
-      setTimeout(() => { this.showSuccess = false; }, 10000);
-      this.folderService.list(this.userIdTest).then(result => { this.folderList = result });
-    } else
-    {
-      this.txtError = 'error occured in deleting folder';
-      this.showError = true;
-      setTimeout(() => { this.showError = false; }, 10000);
-    }
+    this.folderService.delete(this.CurrentFolderId).subscribe(result => {
+      if (result) {
+        this.txtSuccess = 'folder deleted successfully';
+        this.showSuccess = true;
+        setTimeout(() => { this.showSuccess = false; }, 2000);
+        this.folderService.list(this.userIdTest).then(result => { this.folderList = result });
+      } else {
+        this.txtError = 'error occured in deleting folder';
+        this.showError = true;
+        setTimeout(() => { this.showError = false; }, 2000);
+      }
+      this.router.navigate(['folders']);
+    });
   }
 }

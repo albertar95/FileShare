@@ -1,0 +1,154 @@
+﻿@model IEnumerable<Application.DTO.User.UserDTO>
+
+@{
+    ViewBag.Title = "Users";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row" style="display:flex;">
+    <div class="col-md-3">
+        <a style="margin:10px;" href="@Url.Action("AddUser","Home")" class="btn btn-success"><i class="fa fa-plus"></i> add </a>
+    </div>
+    <div class="col-md-9">
+        <div class="alert alert-success alert-dismissable" id="divSuccess" hidden>
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+            <p id="txtSuccess"></p>
+        </div>
+        <div class="alert alert-danger alert-dismissable" id="divError" hidden>
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+            <p id="txtError"></p>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <!-- Advanced Tables -->
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                Users
+            </div>
+            <div class="panel-body">
+                <div class="table-responsive">
+                    @{bool IsOdd = true; }
+                    <table class="table table-striped table-bordered table-hover" id="dataTables-example">
+                        <thead>
+                            <tr>
+                                <th style="text-align:center;">Username</th>
+                                <th style="text-align:center;">Fullname</th>
+                                <th style="text-align:center;">Access Level</th>
+                                <th style="text-align:center;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var usr in Model)
+                            {
+                                if (IsOdd)
+                                {
+                                    <tr class="odd gradeA">
+                                        <td style="text-align:center;">@usr.Username</td>
+                                        <td style="text-align:center;">@usr.Fullname</td>
+                                        @if (usr.IsAdmin)
+                                        {
+                                            <td style="text-align:center;">Admin User</td>
+                                        }
+                                        else
+                                        {
+                                            <td style="text-align:center;">Simple User</td>
+                                        }
+                                        <td style="text-align:center;">
+                                            <a href="@Url.Action("EditUser","Home",new { UserId = usr.Id })" class="btn btn-warning"><i class="fa fa-pencil"></i></a>
+                                            <a href="#" onclick="DeleteUser(event,'@usr.Id','@usr.Username')" class="btn btn-danger"><i class="fa fa-trash-o"></i></a>
+                                            <a href="@Url.Action("UserDetail","Home",new { UserId = usr.Id })" class="btn btn-info"><i class="fa fa-info"></i></a>
+                                        </td>
+                                    </tr>
+                                }
+                                else
+                                {
+                                    <tr class="even gradeA">
+                                        <td style="text-align:center;">@usr.Username</td>
+                                        <td style="text-align:center;">@usr.Fullname</td>
+                                        @if (usr.IsAdmin)
+                                        {
+                                            <td style="text-align:center;">Admin User</td>
+                                        }
+                                        else
+                                        {
+                                            <td style="text-align:center;">Simple User</td>
+                                        }
+                                        <td style="text-align:center;">
+                                            <a href="@Url.Action("EditUser","Home",new { UserId = usr.Id })" class="btn btn-warning"><i class="fa fa-pencil"></i></a>
+                                            <a href="#" onclick="DeleteUser(event,'@usr.Id','@usr.Username')" class="btn btn-danger"><i class="fa fa-trash-o"></i></a>
+                                            <a href="@Url.Action("UserDetail","Home",new { UserId = usr.Id })" class="btn btn-info"><i class="fa fa-info"></i></a>
+                                        </td>
+                                    </tr>
+                                }
+                                IsOdd = !IsOdd;
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+        <!--End Advanced Tables -->
+    </div>
+</div>
+<div class="modal fade" id="DeleteModal" tabindex="-1" role="dialog" aria-labelledby="DeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">Delete User</h4>
+            </div>
+            <div class="modal-body">
+                are you sure to delete this user?
+                folder name : <p id="txtUserName"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <a href="" id="btnDeleteUser" type="button" class="btn btn-danger">Delete it!</a>
+            </div>
+        </div>
+    </div>
+</div>
+@section Styles
+    {
+    <link href="@Url.Content("~/Content/assets/js/dataTables/dataTables.bootstrap.css")" rel="stylesheet" />
+}
+@section Scripts
+    {
+    <!-- DATA TABLE SCRIPTS -->
+    <script src="@Url.Content("~/Content/assets/js/dataTables/jquery.dataTables.js")"></script>
+    <script src="@Url.Content("~/Content/assets/js/dataTables/dataTables.bootstrap.js")"></script>
+    <script type="text/javascript">
+        $(function () {
+            $('#dataTables-example').dataTable();
+            if ('@TempData["UserSuccess"]' != "")
+            {
+                $("#txtSuccess").text('@TempData["UserSuccess"]');
+                $("#divSuccess").removeAttr('hidden');
+                window.setTimeout(function ()
+                {
+                    $("#divSuccess").attr('hidden', 'hidden');
+                }, 10000);
+            }
+            if ('@TempData["UserError"]' != "")
+            {
+                $("#txtError").text('@TempData["UserError"]');
+                $("#divError").removeAttr('hidden');
+                window.setTimeout(function ()
+                {
+                    $("#divError").attr('hidden', 'hidden');
+                }, 10000);
+            }
+        });
+        function DeleteUser(e, userId, Username)
+        {
+            e.preventDefault();
+            $("#txtUserName").text(Username);
+            $("#btnDeleteUser").attr('href', '@Url.Action("SubmitDeleteUser", "Home")' + '?UserId=' + userId);
+            $("#DeleteModal").modal();
+        }
+    </script>
+}

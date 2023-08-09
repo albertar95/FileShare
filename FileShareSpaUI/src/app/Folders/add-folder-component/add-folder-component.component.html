@@ -8,10 +8,10 @@
       </div>
     </div>
     <div class="form-group">
-      <label class="control-label col-md-2" for="IsAdmin">Is Local</label>
-      <input class="checkbox ckbx" id="IsLocal" name="IsLocal" type="checkbox" ngModel value="false">
+      <label class="control-label col-md-2" for="IsLocal">Is Local</label>
+      <input class="checkbox ckbx" id="IsLocal" name="IsLocal" type="checkbox" ngModel value="false" (change)="IsLocalChanged()">
     </div>
-    <div class="form-group">
+    <div class="form-group" [hidden]="IsLocalFolder">
       <label class="control-label col-md-2">Path</label>
       <div class="col-md-10">
         <input type="text" id="Path" name="Path" class="form-control frmInp" ngModel />
@@ -19,11 +19,11 @@
     </div>
     <div class="form-group">
       <label class="control-label col-md-2" for="IsPublic">Is Public</label>
-      <input class="checkbox ckbx" id="IsPublic" name="IsPublic" type="checkbox" ngModel value="false">
+      <input class="checkbox ckbx" id="IsPublic" name="IsPublic" type="checkbox" ngModel>
     </div>
     <div class="form-group">
       <label class="control-label col-md-2" for="IsAdmin">Is Protected</label>
-      <input class="checkbox ckbx" id="IsProtected" name="IsProtected" type="checkbox" ngModel value="false">
+      <input class="checkbox ckbx" id="IsProtected" name="IsProtected" type="checkbox" ngModel [checked]="false">
     </div>
 
     <div class="form-group">

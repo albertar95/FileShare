@@ -1,0 +1,74 @@
+﻿@model Application.DTO.User.UserDTO
+
+@{
+    ViewBag.Title = "UserDetail";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>User Detail</h2>
+
+<div>
+    <dl class="dl-horizontal">
+        <dt style="margin-bottom:5px;">
+            @Html.DisplayNameFor(model => model.Username)
+        </dt>
+
+        <dd class="form-control" style="margin-bottom:5px;">
+            @Html.DisplayFor(model => model.Username)
+        </dd>
+        <dt style="margin-bottom:5px;">
+            @Html.DisplayNameFor(model => model.Fullname)
+        </dt>
+
+        <dd class="form-control" style="margin-bottom:5px;">
+            @Html.DisplayFor(model => model.Fullname)
+        </dd>
+        <dt style="margin-bottom:5px;">
+            @Html.DisplayNameFor(model => model.LastLoginDate)
+        </dt>
+
+        <dd class="form-control" style="margin-bottom:5px;">
+            @Html.DisplayFor(model => model.LastLoginDate)
+        </dd>
+        <dt style="margin-bottom:5px;">
+            User Level
+        </dt>
+        @if (Model.IsAdmin)
+        {
+            <dd class="form-control" style="margin-bottom:5px;">Admin User</dd>
+        }
+        else
+        {
+            <dd class="form-control" style="margin-bottom:5px;">Simple User</dd>
+        }
+        <dt style="margin-bottom:5px;">
+            @Html.DisplayNameFor(model => model.IsDisabled)
+        </dt>
+        @if (Model.IsDisabled)
+        {
+            <dd class="form-control" style="margin-bottom:5px;">True</dd>
+        }
+        else
+        {
+            <dd class="form-control" style="margin-bottom:5px;">False</dd>
+        }
+        <dt style="margin-bottom:5px;">
+            @Html.DisplayNameFor(model => model.CreateDate)
+        </dt>
+
+        <dd class="form-control" style="margin-bottom:5px;">
+            @Html.DisplayFor(model => model.CreateDate)
+        </dd>
+
+        <dt style="margin-bottom:5px;">
+            @Html.DisplayNameFor(model => model.LastModified)
+        </dt>
+
+        <dd class="form-control" style="margin-bottom:5px;">
+            @Html.DisplayFor(model => model.LastModified)
+        </dd>
+    </dl>
+</div>
+<p>
+    <a href="@Url.Action("Users","Home")" class="btn btn-default">Return</a>
+</p>

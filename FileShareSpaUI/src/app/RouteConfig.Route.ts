@@ -5,6 +5,8 @@ import { AddFolderComponentComponent } from "./Folders/add-folder-component/add-
 import { EditFolderComponentComponent } from "./Folders/edit-folder-component/edit-folder-component.component";
 import { FolderDetailComponentComponent } from "./Folders/folder-detail-component/folder-detail-component.component";
 import { FoldersComponentComponent } from "./Folders/folders-component/folders-component.component";
+import { LoginComponent } from "./login/login.component";
+import { LoginResult } from "./Models/LoginResult.model";
 import { MyProfileComponentComponent } from "./UserProfile/my-profile-component/my-profile-component.component";
 import { AddUserComponentComponent } from "./Users/add-user-component/add-user-component.component";
 import { EditUserComponentComponent } from "./Users/edit-user-component/edit-user-component.component";
@@ -22,6 +24,7 @@ const appRoutes: Routes = [
   { path: 'users/:id/edit', component: EditUserComponentComponent },
   { path: 'users/:id/detail', component: UserDetailComponentComponent },
   { path: 'userprofile', component: MyProfileComponentComponent },
+  { path: 'login', component: LoginComponent },
   /*,{ path: '**', redirectTo: '/not-found' }*/
 ];
 

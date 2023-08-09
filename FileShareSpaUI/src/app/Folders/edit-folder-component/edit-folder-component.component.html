@@ -4,16 +4,16 @@
     <div class="form-group">
       <label class="control-label col-md-2">Title</label>
       <div class="col-md-10">
-        <input type="text" id="Title" name="Title" class="form-control frmInp" ngModel autofocus />
+        <input type="text" id="Title" name="Title" class="form-control frmInp" [(ngModel)]="folder.Title" autofocus />
       </div>
     </div>
     <div class="form-group">
       <label class="control-label col-md-2" for="IsPublic">Is Public</label>
-      <input class="checkbox ckbx" id="IsPublic" name="IsPublic" type="checkbox" ngModel value="false">
+      <input class="checkbox ckbx" id="IsPublic" name="IsPublic" type="checkbox" [(ngModel)]="folder.IsPublic">
     </div>
     <div class="form-group">
-      <label class="control-label col-md-2" for="IsAdmin">Is Protected</label>
-      <input class="checkbox ckbx" id="IsProtected" name="IsProtected" type="checkbox" ngModel value="false">
+      <label class="control-label col-md-2" for="IsProtected">Is Protected</label>
+      <input class="checkbox ckbx" id="IsProtected" name="IsProtected" type="checkbox" [(ngModel)]="folder.IsProtected">
     </div>
 
     <div class="form-group">

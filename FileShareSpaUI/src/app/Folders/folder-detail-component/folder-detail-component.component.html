@@ -7,26 +7,29 @@
     </dt>
 
     <dd class="form-control" style="margin-bottom:5px;">
-      @Html.DisplayFor(model => model.Title)
+      {{ folder.Title }}
     </dd>
     <dt style="margin-bottom:5px;">
       Folder Type
     </dt>
-    <dd class="form-control" style="margin-bottom:5px;">Local</dd>
+    <dd class="form-control" style="margin-bottom:5px;" *ngIf="folder.IsLocal">Local</dd>
+    <dd class="form-control" style="margin-bottom:5px;" *ngIf="!folder.IsLocal">Virtual</dd>
     <dt style="margin-bottom:5px;">
       Access Level
     </dt>
-    <dd class="form-control" style="margin-bottom:5px;">Public</dd>
+    <dd class="form-control" style="margin-bottom:5px;" *ngIf="folder.IsPublic">Public</dd>
+    <dd class="form-control" style="margin-bottom:5px;" *ngIf="!folder.IsPublic">Private</dd>
     <dt style="margin-bottom:5px;">
       IsProtected
     </dt>
-    <dd class="form-control" style="margin-bottom:5px;">True</dd>
+    <dd class="form-control" style="margin-bottom:5px;" *ngIf="folder.IsPublic">True</dd>
+    <dd class="form-control" style="margin-bottom:5px;" *ngIf="!folder.IsPublic">False</dd>
     <dt style="margin-bottom:5px;">
       CreateDate
     </dt>
 
     <dd class="form-control" style="margin-bottom:5px;">
-
+      {{ folder.CreateDate }}
     </dd>
 
     <dt style="margin-bottom:5px;">
@@ -34,17 +37,17 @@
     </dt>
 
     <dd class="form-control" style="margin-bottom:5px;">
-
+      {{ folder.LastModified }}
     </dd>
     <dt style="margin-bottom:5px;">
       Path
     </dt>
 
     <dd class="form-control" style="margin-bottom:5px;">
-      
+      {{ folder.Path }}
     </dd>
   </dl>
 </div>
 <p>
-  <a [routerLink]="['/Folders']" class="btn btn-default">Return</a>
+  <a [routerLink]="['/folders']" class="btn btn-default">Return</a>
 </p>

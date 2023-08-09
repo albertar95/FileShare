@@ -31,20 +31,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="AutoMapper, Version=8.0.0.0, Culture=neutral, PublicKeyToken=be96cd2c38ef1005, processorArchitecture=MSIL">
-      <HintPath>..\packages\AutoMapper.8.0.0\lib\net461\AutoMapper.dll</HintPath>
-    </Reference>
-    <Reference Include="MediatR, Version=12.0.0.0, Culture=neutral, PublicKeyToken=bb9a41a5e8aaa7e2, processorArchitecture=MSIL">
-      <HintPath>..\packages\MediatR.12.0.1\lib\netstandard2.0\MediatR.dll</HintPath>
-    </Reference>
-    <Reference Include="MediatR.Contracts, Version=2.0.1.0, Culture=neutral, PublicKeyToken=bb9a41a5e8aaa7e2, processorArchitecture=MSIL">
-      <HintPath>..\packages\MediatR.Contracts.2.0.1\lib\netstandard2.0\MediatR.Contracts.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=7.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Bcl.AsyncInterfaces.7.0.0\lib\netstandard2.0\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Extensions.DependencyInjection.Abstractions, Version=7.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Extensions.DependencyInjection.Abstractions.7.0.0\lib\netstandard2.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -65,16 +53,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ApplicationServiceRegistration.cs" />
     <Compile Include="DTO\Folder\CreateFolderDTO.cs" />
     <Compile Include="DTO\Folder\FolderDTO.cs" />
     <Compile Include="DTO\Folder\UpdateFolderDTO.cs" />
     <Compile Include="DTO\User\CreateUserDTO.cs" />
     <Compile Include="DTO\User\UpdateUserDTO.cs" />
     <Compile Include="DTO\User\UserDTO.cs" />
-    <Compile Include="EntityMapper\Contract\IEntityMapper.cs" />
-    <Compile Include="EntityMapper\Service\EntityMapper.cs" />
-    <Compile Include="Helper\Encryption.cs" />
+    <Compile Include="Model\DirectoryContent.cs" />
+    <Compile Include="Service\EntityMapper\IEntityMapper.cs" />
+    <Compile Include="Service\Helper\IDirectoryHelper.cs" />
+    <Compile Include="Service\Helper\IEncryptionHelper.cs" />
     <Compile Include="Model\LoginCredential.cs" />
     <Compile Include="Model\LoginResult.cs" />
     <Compile Include="Persistence\Common\IBaseRepository.cs" />

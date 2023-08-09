@@ -56,12 +56,6 @@
     <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\EntityFramework.6.4.4\lib\net45\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
-    <Reference Include="MediatR, Version=12.0.0.0, Culture=neutral, PublicKeyToken=bb9a41a5e8aaa7e2, processorArchitecture=MSIL">
-      <HintPath>..\packages\MediatR.12.0.1\lib\netstandard2.0\MediatR.dll</HintPath>
-    </Reference>
-    <Reference Include="MediatR.Contracts, Version=2.0.1.0, Culture=neutral, PublicKeyToken=bb9a41a5e8aaa7e2, processorArchitecture=MSIL">
-      <HintPath>..\packages\MediatR.Contracts.2.0.1\lib\netstandard2.0\MediatR.Contracts.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=6.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Bcl.AsyncInterfaces.6.0.0\lib\net461\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
     </Reference>
@@ -172,9 +166,9 @@
       <Project>{0FE55A62-7452-4A94-8771-E6F160CF4DB0}</Project>
       <Name>Domain</Name>
     </ProjectReference>
-    <ProjectReference Include="..\FileShareWebUI\FileShareWebUI.csproj">
-      <Project>{62754A81-D877-438D-A292-5738C86DC7A4}</Project>
-      <Name>FileShareWebUI</Name>
+    <ProjectReference Include="..\FileShareService\FileShareService.csproj">
+      <Project>{2F337060-FBD9-4E55-B585-734FA8BD3891}</Project>
+      <Name>FileShareService</Name>
     </ProjectReference>
     <ProjectReference Include="..\Persistence\Persistence.csproj">
       <Project>{a1e527d1-cc5e-40fc-980c-d4e50a81ab0f}</Project>

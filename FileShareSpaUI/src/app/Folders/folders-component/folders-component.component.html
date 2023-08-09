@@ -38,8 +38,8 @@
                 <td style="text-align:center;" *ngIf="fld.IsLocal">Local</td>
                 <td style="text-align:center;" *ngIf="!fld.IsLocal">Virtual</td>
                 <td style="text-align:center;" *ngIf="fld.IsProtected">Protected</td>
-                <td style="text-align:center;" *ngIf="!fld.IsProtected && IsPublic">Public</td>
-                <td style="text-align:center;" *ngIf="!fld.IsProtected && !IsPublic">Private</td>
+                <td style="text-align:center;" *ngIf="!fld.IsProtected && fld.IsPublic">Public</td>
+                <td style="text-align:center;" *ngIf="!fld.IsProtected && !fld.IsPublic">Private</td>
                 <td style="text-align:center;">
                   <a [routerLink]="['/folders', fld.Id, 'edit']" class="btn btn-warning btn-margins"><i class="fa fa-pencil"></i></a>
                   <a (click)="DeleteFolderEvent(fld.Id,fld.Title)" class="btn btn-danger btn-margins"><i class="fa fa-trash-o"></i></a>

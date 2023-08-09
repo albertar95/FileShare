@@ -16,6 +16,7 @@
                         IsPublic INT NOT NULL,
                         IsProtected INT NOT NULL,
                         Path TEXT NOT NULL,
+						VirtualPath TEXT NOT NULL,
                         UserId TEXT NOT NULL,
                         CreateDate DateTime NOT NULL,
                         LastModified DateTime NULL,
