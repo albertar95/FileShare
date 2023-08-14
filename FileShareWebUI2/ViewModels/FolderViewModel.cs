@@ -1,4 +1,5 @@
 ﻿using Application.DTO.Folder;
+using Application.Model;
 using FileShareWebUI2.Helpers;
 using System;
 using System.Collections.Generic;
@@ -11,6 +12,6 @@ namespace FileShareWebUI2.ViewModels
     {
         public FolderDTO Folder { get; set; }
         public List<DirectoryContent> Contents { get; set; }
-        public string ReturnUrl { get; set; }
+        public DirectoryContent Directory { get; set; }
     }
 }

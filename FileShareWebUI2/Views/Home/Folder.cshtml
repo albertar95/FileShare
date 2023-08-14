@@ -3,139 +3,140 @@
     ViewBag.Title = "Folder";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-
-<div class="row">
-    <div class="col-md-3">
-        <button style="margin:10px;" onclick="NewFolderModal()" class="btn btn-success"><i class="fa fa-plus"></i> new folder</button>
-        <button style="margin:10px;" onclick="UploadModal()" class="btn btn-info"><i class="fa fa-upload"></i> upload</button>
-    </div>
-    <div class="col-md-6">
-        <div class="alert alert-success alert-dismissable" id="divSuccess" hidden>
-            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-            <p id="txtSuccess"></p>
+<div id="FolderContentSection">
+    <div class="row">
+        <div class="col-md-3">
+            <a style="margin:10px;" data-toggle="modal" data-target="#NewFolderModal" class="btn btn-success"><i class="fa fa-plus"></i> new folder</a>
+            <a style="margin:10px;" data-toggle="modal" data-target="#UploadModal" class="btn btn-info"><i class="fa fa-upload"></i> upload</a>
         </div>
-        <div class="alert alert-danger alert-dismissable" id="divError" hidden>
-            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-            <p id="txtError"></p>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <a style="margin:10px;float:right;" href="@Model.ReturnUrl" class="btn btn-default">return <i class="fa fa-arrow-circle-o-right"></i></a>
-    </div>
-</div>
-
-<div class="row">
-    <div class="col-md-12">
-        <!-- Advanced Tables -->
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                Folder : @Model.Folder.Title
+        <div class="col-md-6">
+            <div class="alert alert-success alert-dismissable" id="divSuccess" hidden>
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                <p id="txtSuccess"></p>
             </div>
-            <div class="panel-body">
-                <div class="table-responsive">
-                    @{bool IsOdd = true; }
-                    <table class="table table-striped table-bordered table-hover" id="dataTables-example">
-                        <thead>
-                            <tr>
-                                <th style="text-align:center;">Title</th>
-                                <th style="text-align:center;">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var cnt in Model.Contents.OrderByDescending(p => p.ContentType))
-                            {
-                                if (IsOdd)
+            <div class="alert alert-danger alert-dismissable" id="divError" hidden>
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                <p id="txtError"></p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <a style="margin:10px;float:right;" href="@Url.Action("Index", "Home")" class="btn btn-default">return <i class="fa fa-arrow-circle-o-right"></i></a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <!-- Advanced Tables -->
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Folder : @Model.Folder.Title
+                </div>
+                <div class="panel-body" id="tblContents">
+                    <div class="table-responsive">
+                        @{bool IsOdd = true; }
+                        <table class="table table-striped table-bordered table-hover" id="dataTables-example">
+                            <thead>
+                                <tr>
+                                    <th style="text-align:center;">Title</th>
+                                    <th style="text-align:center;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var cnt in Model.Contents.OrderByDescending(p => p.ContentType))
                                 {
-                                    <tr class="odd gradeA">
-                                        <td style="text-align:center;">@cnt.Title</td>
-                                        @if (cnt.ContentType == FileShareWebUI2.Helpers.FolderContentType.File)
-                                        {
-                                            <td style="text-align:center;">
-                                                <a target="_blank" href="@Url.Action("DownloadFile", "Home", new { FilePath = cnt.Path })" class="btn btn-primary">Download</a>
-                                                <a href="@Url.Action("ViewFile", "Home", new { FilePath = cnt.Path,FolderId = Model.Folder.Id })" class="btn btn-default">View</a>
-                                            </td>
-                                        }
-                                        else
-                                        {
-                                            <td style="text-align:center;">
-                                                <a href="@Url.Action("SubFolder", "Home", new { FolderId = Model.Folder.Id,FolderPath = cnt.Path })"
-                                                   class="btn btn-default">Browse</a>
-                                            </td>
-                                        }
-                                    </tr>
+                                    if (IsOdd)
+                                    {
+                                        <tr class="odd gradeA">
+                                            <td style="text-align:center;">@cnt.Title</td>
+                                            @if (cnt.ContentType == Application.Model.FolderContentType.File)
+                                            {
+                                                <td style="text-align:center;">
+                                                    <a target="_blank" href="@Url.Action("DownloadFile", "Home", new { FilePath = cnt.Path })" class="btn btn-primary">Download</a>
+                                                    <a href="@Url.Action("ViewFile", "Home", new { FilePath = cnt.Path,FolderId = Model.Folder.Id })" class="btn btn-default">View</a>
+                                                </td>
+                                            }
+                                            else
+                                            {
+                                                <td style="text-align:center;">
+                                                    <a onclick="SubFolder(event,'@cnt.Id')" class="btn btn-default">Browse</a>
+                                                </td>
+                                            }
+                                        </tr>
+                                    }
+                                    else
+                                    {
+                                        <tr class="even gradeA">
+                                            <td style="text-align:center;">@cnt.Title</td>
+                                            @if (cnt.ContentType == Application.Model.FolderContentType.File)
+                                            {
+                                                <td style="text-align:center;">
+                                                    <a href="@Url.Action("DownloadFile", "Home", new { FilePath = cnt.Path })" class="btn btn-primary">Download</a>
+                                                    <a href="@Url.Action("ViewFile", "Home", new { FilePath = cnt.Path,FolderId = Model.Folder.Id })" class="btn btn-default">View</a>
+                                                </td>
+                                            }
+                                            else
+                                            {
+                                                <td style="text-align:center;">
+                                                    <a onclick="SubFolder(event,'@cnt.Id')" class="btn btn-default">Browse</a>
+                                                </td>
+                                            }
+                                        </tr>
+                                    }
+                                    IsOdd = !IsOdd;
                                 }
-                                else
-                                {
-                                    <tr class="even gradeA">
-                                        <td style="text-align:center;">@cnt.Title</td>
-                                        @if (cnt.ContentType == FileShareWebUI2.Helpers.FolderContentType.File)
-                                        {
-                                            <td style="text-align:center;">
-                                                <a href="@Url.Action("DownloadFile", "Home", new { FilePath = cnt.Path })" class="btn btn-primary">Download</a>
-                                                <a href="@Url.Action("ViewFile", "Home", new { FilePath = cnt.Path,FolderId = Model.Folder.Id })" class="btn btn-default">View</a>
-                                            </td>
-                                        }
-                                        else
-                                        {
-                                            <td style="text-align:center;">
-                                                <a href="@Url.Action("SubFolder", "Home", new { FolderId = Model.Folder.Id,FolderPath = cnt.Path })"
-                                                   class="btn btn-default">Browse</a>
-                                            </td>
-                                        }
-                                    </tr>
-                                }
-                                IsOdd = !IsOdd;
-                            }
-                        </tbody>
-                    </table>
-                </div>
+                            </tbody>
+                        </table>
+                    </div>
 
-            </div>
-        </div>
-        <!--End Advanced Tables -->
-    </div>
-</div>
-<div class="modal fade" id="NewFolderModal" tabindex="-1" role="dialog" aria-labelledby="NewFolderModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                <h4 class="modal-title" id="myModalLabel">New Folder</h4>
-            </div>
-            @using (Html.BeginForm("AddSubFolder", "Home", FormMethod.Post, new { enctype = "multipart/form-data" }))
-            {
-            <div class="modal-body">
-                <input class="form-control" name="FolderName" id="FolderName" placeholder="Folder Name" autofocus />
-                <input class="form-control" name="RootPath" id="RootPath" value="@Model.Folder.Path" style="display:none;" />
-                <input class="form-control" name="FolderId" id="FolderId" value="@Model.Folder.Id" style="display:none;" />
-            </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary">Create</button>
                 </div>
-            }
+            </div>
+            <!--End Advanced Tables -->
         </div>
     </div>
-</div>
-<div class="modal fade" id="UploadModal" tabindex="-1" role="dialog" aria-labelledby="UploadModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                <h4 class="modal-title" id="myModalLabel">Upload File</h4>
+    <div class="modal fade" id="NewFolderModal" tabindex="-1" role="dialog" aria-labelledby="NewFolderModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel">New Folder</h4>
+                </div>
+                <form>
+                    <div class="modal-body">
+                        <input class="form-control" name="FolderName" id="AddSubFolderFolderName" placeholder="Folder Name" autofocus />
+                        <input id="AddSubFolderRootPath" value="@Model.Directory.Path" hidden readonly />
+                        <input id="AddSubFolderRootFolderId" value="@Model.Directory.Id" hidden readonly />
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary" onclick="SubmitAddSubFolder(event)">Create</button>
+                    </div>
+                </form>
             </div>
-            @using (Html.BeginForm("UploadFile", "Home", FormMethod.Post, new { enctype = "multipart/form-data" }))
-            {
-                <div class="modal-body">
-                    <input class="form-control" name="FileUpload" id="FileUpload" type="file" />
-                    <input class="form-control" name="RootPath" id="RootPath" value="@Model.Folder.Path" style="display:none;" />
-                    <input class="form-control" name="FolderId" id="FolderId" value="@Model.Folder.Id" style="display:none;" />
+        </div>
+    </div>
+    <div class="modal fade" id="UploadModal" tabindex="-1" role="dialog" aria-labelledby="UploadModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel">Upload File</h4>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-info">Upload</button>
-                </div>
-            }
+                <form>
+                    <div class="modal-body">
+                        <input class="form-control" name="FileUpload" id="FileUpload" type="file" />
+                        <input id="UploadRootPath" value="@Model.Directory.Path" hidden readonly />
+                        <input id="UploadRootFolderId" value="@Model.Directory.Id" hidden readonly />
+                        <div id="progressbar_container" style="width: 100%; height: 30px; position: relative; background-color: grey; display: none">
+                            <div id="progressbar" style="width: 0%; height: 100%; position: absolute; background-color: green"></div>
+                            <span id="progressbar_label" style="position: absolute; left: 35%; top: 20%">Uploading...</span>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="submit" onclick="SubmitUploadFile(event)" class="btn btn-info">Upload</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>
@@ -180,13 +181,160 @@
             $("#btnDeleteFolder").attr('href', '@Url.Action("SubmitDeleteFolder", "Home")' + '?FolderId=' + folderId);
             $("#DeleteModal").modal();
         }
-        function NewFolderModal()
+        function SubFolder(e,folderId)
         {
-            $("#NewFolderModal").modal();
+            e.preventDefault();
+            $.ajax(
+                {
+                    url: '@Url.Action("SubFolder","Home")',
+                    type: 'post',
+                    dataType: 'json',
+                    data: { RootFolderId: '@Model.Folder.Id', FolderId: folderId },
+                    success: function (result)
+                    {
+                        if (result.isSuccessfull)
+                            $("#FolderContentSection").html(result.PageContent);
+                        else
+                        {
+                            $("#txtError").text('خطا در واکشی اطلاعات');
+                            $("#divError").removeAttr('hidden');
+                            window.setTimeout(function ()
+                            {
+                                $("#divError").attr('hidden', 'hidden');
+                            }, 10000);
+                        }
+                    },
+                    error: function ()
+                    {
+                        $("#txtError").text('خطا در واکشی اطلاعات');
+                        $("#divError").removeAttr('hidden');
+                        window.setTimeout(function () {
+                            $("#divError").attr('hidden', 'hidden');
+                        }, 10000);
+                    }
+                });
         }
-        function UploadModal()
+        function SubmitAddSubFolder(e)
         {
-            $("#UploadModal").modal();
+            e.preventDefault();
+            $.ajax(
+                {
+                    url: '@Url.Action("AddSubFolder", "Home")',
+                    type: 'post',
+                    dataType: 'json',
+                    data: {
+                        RootFolderId: '@Model.Folder.Id', RootPath: $("#AddSubFolderRootPath").val(),
+                        FolderName: $("#AddSubFolderFolderName").val(), RootFolderDirectoryId: $("#AddSubFolderRootFolderId").val()
+                    },
+                    success: function (result)
+                    {
+                        $("#NewFolderModal").modal('hide');
+                        if (result.isSuccessfull)
+                            $("#tblContents").html(result.PageContent);
+                        else
+                        {
+                            $("#txtError").text('خطا در انجام عملیات');
+                            $("#divError").removeAttr('hidden');
+                            window.setTimeout(function ()
+                            {
+                                $("#divError").attr('hidden', 'hidden');
+                            }, 10000);
+                        }
+                    },
+                    error: function ()
+                    {
+                        $("#NewFolderModal").modal('hide');
+                        $("#txtError").text('خطا در انجام عملیات');
+                        $("#divError").removeAttr('hidden');
+                        window.setTimeout(function () {
+                            $("#divError").attr('hidden', 'hidden');
+                        }, 10000);
+                    }
+                });
         }
+
+        //upload file section
+
+        var progressBarStart = function () {
+            $("#progressbar_container").show();
+        }
+
+        var progressBarUpdate = function (percentage) {
+            $('#progressbar_label').html(percentage + "%");
+            $("#progressbar").width(percentage + "%");
+        }
+
+        var progressBarComplete = function () {
+            $("#progressbar_container").fadeOut(500);
+        }
+
+        var file;
+
+        $('#FileUpload').change(function (e) {
+            file = e.target.files[0];
+        });
+
+        var uploadCompleted = function () {
+            var formData = new FormData();
+            formData.append('fileName', file.name);
+            formData.append('completed', true);
+
+            var xhr2 = new XMLHttpRequest();
+            xhr2.onload = function (result) {
+                progressBarUpdate(100);
+                progressBarComplete();
+                $("#UploadModal").modal('hide');
+                if (result.isSuccessfull)
+                    $("#tblContents").html(result.PageContent);
+                else {
+                    $("#txtError").text('خطا در انجام عملیات');
+                    $("#divError").removeAttr('hidden');
+                    window.setTimeout(function () {
+                        $("#divError").attr('hidden', 'hidden');
+                    }, 10000);
+                }
+            }
+            xhr2.open("POST", '@Url.Action("UploadComplete", "Home")' + "?fileName=" + file.name + "&RootFolderId=" +
+                '@Model.Folder.Id' + "&RootPath=" + $("#AddSubFolderRootPath").val() + "&RootFolderDirectoryId=" +
+                $("#AddSubFolderRootFolderId").val(), true);
+            xhr2.send(formData);
+        }
+
+        var multiUpload = function (count, counter, blob, completed, start, end, bytesPerChunk) {
+            counter = counter + 1;
+            if (counter <= count) {
+                var chunk = blob.slice(start, end);
+                var xhr = new XMLHttpRequest();
+                xhr.onload = function () {
+                    start = end;
+                    end = start + bytesPerChunk;
+                    if (count == counter) {
+                        uploadCompleted();
+                    } else {
+                        var percentage = (counter / count) * 100;
+                        progressBarUpdate(percentage);
+                        multiUpload(count, counter, blob, completed, start, end, bytesPerChunk);
+                    }
+                }
+                xhr.open("POST", '@Url.Action("MultiUpload","Home")' + "?id=" + counter.toString() + "&fileName=" + file.name, true);
+                xhr.send(chunk);
+            }
+        }
+        function SubmitUploadFile(e) {
+            e.preventDefault();
+            alert(file.filename);
+            var blob = file;
+            var bytesPerChunk = 3757000;
+            var size = blob.size;
+
+            var start = 0;
+            var end = bytesPerChunk;
+            var completed = 0;
+            var count = size % bytesPerChunk == 0 ? size / bytesPerChunk : Math.floor(size / bytesPerChunk) + 1;
+            var counter = 0;
+            progressBarStart();
+            multiUpload(count, counter, blob, completed, start, end, bytesPerChunk);
+        }
+        //upload process idol = https://stackoverflow.com/questions/16287706/how-to-upload-large-files-using-mvc-4
     </script>
 }

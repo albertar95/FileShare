@@ -49,18 +49,15 @@ namespace Application.Helpers
                 return false;
             }
         }
-        public List<DirectoryContent> GetFolderContent(string RootPath)
+        public List<DirectoryContent> GetFolderContent(string RootPath,int height = 1,long rootId = 0,long startIndex = 0)
         {
             List<DirectoryContent> result = new List<DirectoryContent>();
-            foreach (var dir in Directory.GetDirectories(RootPath))
+            var FirstLevelContents = GetChildElements(RootPath, height,rootId,startIndex);
+            result.AddRange(FirstLevelContents);
+            height++;
+            foreach (var node in FirstLevelContents.Where(p => p.ContentType == FolderContentType.Folder).ToList())
             {
-                result.Add(new DirectoryContent() {  ContentType = FolderContentType.Folder, Path = dir,
-                    Format = ".dir", Title = dir.Split('\\').Last() });
-            }
-            foreach (var dir in Directory.GetFiles(RootPath))
-            {
-                result.Add(new DirectoryContent() { ContentType = FolderContentType.File, Path = dir,
-                    Format = Path.GetExtension(dir), Title = Path.GetFileName(dir) });
+                result.AddRange(GetFolderContent(node.Path,height,node.Id,result.Max(p => p.Id)));
             }
             return result;
         }
@@ -86,6 +83,11 @@ namespace Application.Helpers
             else
                 return FileContentType.Unknown;
         }
+        public bool CreateSubFolder(string path)
+        {
+            Directory.CreateDirectory(path);
+            return Directory.Exists(path);
+        }
         private void CreateVirtualDirectory(string path,string id)
         {
             //ServerManager iisManager = new ServerManager(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "inetsrv\\config\\applicationHost.config"));
@@ -105,6 +107,43 @@ namespace Application.Helpers
             //    iisManager.Sites["Default Web Site"].Applications[0].VirtualDirectories.Remove(vd);
             //    iisManager.CommitChanges();
             //}
+        }
+        private List<DirectoryContent> GetChildElements(string path,int height,long rootId,long startIndex)
+        {
+            List<DirectoryContent> result = new List<DirectoryContent>();
+            try
+            {
+                foreach (var dir in Directory.GetDirectories(path))
+                {
+                    result.Add(new DirectoryContent()
+                    {
+                        Id = ++startIndex,
+                        ContentType = FolderContentType.Folder,
+                        Path = dir,
+                        Format = ".dir",
+                        Title = dir.Split('\\').Last(),
+                        HeightLevel = height,
+                        RootFolderId = rootId
+                    });
+                }
+                foreach (var dir in Directory.GetFiles(path))
+                {
+                    result.Add(new DirectoryContent()
+                    {
+                        Id = ++startIndex,
+                        ContentType = FolderContentType.File,
+                        Path = dir,
+                        Format = Path.GetExtension(dir),
+                        Title = Path.GetFileName(dir),
+                        HeightLevel = height,
+                        RootFolderId = rootId
+                    });
+                }
+            }
+            catch (Exception)
+            {
+            }
+            return result;
         }
     }
 }

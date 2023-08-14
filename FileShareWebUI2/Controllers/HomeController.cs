@@ -20,74 +20,23 @@ namespace FileShareWebUI2.Controllers
     public class HomeController : Controller
     {
         private static string BaseApiAddress = ConfigurationManager.AppSettings["BaseApiAddress"];
+        private static string UploadTempFolder = ConfigurationManager.AppSettings["FileUploadTempFolderPath"];
+        private static bool IsFoldersChanged = false;
+        private CacheHelper _cacheHelper { get; set; }
 
-        //user section
+        //user crud section
 
-        [AllowAnonymous]
-        public ActionResult Login()
-        {
-            return View();
-        }
-        [HttpPost]
-        [AllowAnonymous]
-        public async Task<ActionResult> SubmitLogin(LoginCredential credential)
-        {
-            //credential.Password = Encryption.EncryptStringView(credential.Password);
-            var body = ApiHelper.Serialize(credential);
-            var result = await ApiHelper.Call(ApiHelper.HttpMethods.Post, $"{BaseApiAddress}/User/LoginUser", body);
-            if (!result.IsSuccessfulResult())
-                return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
-            var Content = ApiHelper.Deserialize<LoginResult>(result.Content);
-            if (Content.successLogin)
-            {
-                //build cookie
-                var userDataCookie = new HttpCookie("FSCookie");
-                userDataCookie.Values.Add("UserId", Content.User.Id.ToString());
-                userDataCookie.Values.Add("UserLevel", Content.User.IsAdmin ? "Admin" : "Simple");
-                userDataCookie.Values.Add("Fullname", Content.User.Fullname);
-                userDataCookie.Secure = true;
-                userDataCookie.HttpOnly = true;
-                userDataCookie.Expires = DateTime.Now.AddHours(8);
-                Response.Cookies.Add(userDataCookie);
-                FormsAuthentication.SetAuthCookie(Content.User.Username, true);
-                return RedirectToAction("Index");
-            }
-            else
-            {
-                TempData["LoginError"] = Content.message;
-                return RedirectToAction("Login");
-            }
-        }
-        public ActionResult Logout()
-        {
-            FormsAuthentication.SignOut();
-            if (Request.Cookies["FSCookie"] != null)
-            {
-                var c = new HttpCookie("FSCookie")
-                {
-                    Expires = DateTime.Now.AddDays(-1)
-                };
-                Response.Cookies.Add(c);
-            }
-
-            return RedirectToAction("Login");
-        }
         public async Task<ActionResult> Users()
         {
-            if (Request.Cookies.AllKeys.Contains("FSCookie"))
+            var Content = new List<UserDTO>();
+            if (CacheHelper.GetCachedUserData().IsAdmin)
             {
-                var Content = new List<UserDTO>();
-                if (Request.Cookies["FSCookie"].Values["UserLevel"] == "Admin")
-                {
-                    var result = await ApiHelper.Call(ApiHelper.HttpMethods.Get, $"{BaseApiAddress}/User/Get");
-                    if (!result.IsSuccessfulResult())
-                        return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
-                    Content = ApiHelper.Deserialize<List<UserDTO>>(result.Content);
-                }
-                return View(Content);
+                var result = await ApiHelper.Call(ApiHelper.HttpMethods.Get, $"{BaseApiAddress}/User/Get");
+                if (!result.IsSuccessfulResult())
+                    return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
+                Content = ApiHelper.Deserialize<List<UserDTO>>(result.Content);
             }
-            else
-                return RedirectToAction("Login");
+            return View(Content);
         }
         public ActionResult AddUser()
         {
@@ -113,23 +62,18 @@ namespace FileShareWebUI2.Controllers
         [HttpPost]
         public async Task<ActionResult> SubmitAddUser(CreateUserDTO user)
         {
-            if (Request.Cookies.AllKeys.Contains("FSCookie"))
+            if (CacheHelper.GetCachedUserData().IsAdmin)
             {
-                if (Request.Cookies["FSCookie"].Values["UserLevel"] == "Admin")
-                {
-                    //user.Password = Encryption.EncryptStringView(user.Password.Trim());
-                    var body = ApiHelper.Serialize(user);
-                    var result = await ApiHelper.Call(ApiHelper.HttpMethods.Post, $"{BaseApiAddress}/User/Post", body);
-                    if (!result.IsSuccessfulResult())
-                        return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
-                    if (ApiHelper.Deserialize<bool>(result.Content))
-                        TempData["UserSuccess"] = "user created successfully.";
-                    else
-                        TempData["UserError"] = "error occured in creating user.try again later.";
-                    return RedirectToAction("Users");
-                }
+                //user.Password = Encryption.EncryptStringView(user.Password.Trim());
+                var body = ApiHelper.Serialize(user);
+                var result = await ApiHelper.Call(ApiHelper.HttpMethods.Post, $"{BaseApiAddress}/User/Post", body);
+                if (!result.IsSuccessfulResult())
+                    return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
+                if (ApiHelper.Deserialize<bool>(result.Content))
+                    TempData["UserSuccess"] = "user created successfully.";
                 else
-                    return RedirectToAction("Login");
+                    TempData["UserError"] = "error occured in creating user.try again later.";
+                return RedirectToAction("Users");
             }
             else
                 return RedirectToAction("Login");
@@ -137,83 +81,61 @@ namespace FileShareWebUI2.Controllers
         [HttpPost]
         public async Task<ActionResult> SubmitEditUser(UpdateUserDTO user)
         {
-            if (Request.Cookies.AllKeys.Contains("FSCookie"))
+            if (CacheHelper.GetCachedUserData().IsAdmin)
             {
-                if (Request.Cookies["FSCookie"].Values["UserLevel"] == "Admin")
-                {
-                    //user.Password = Encryption.EncryptStringView(user.Password.Trim());
-                    var body = ApiHelper.Serialize(user);
-                    var result = await ApiHelper.Call(ApiHelper.HttpMethods.Post, $"{BaseApiAddress}/User/Patch", body);
-                    if (!result.IsSuccessfulResult())
-                        return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
-                    if (ApiHelper.Deserialize<bool>(result.Content))
-                        TempData["UserSuccess"] = "user edited successfully.";
-                    else
-                        TempData["UserError"] = "error occured in editing user.try again later.";
-                    return RedirectToAction("Users");
-                }
+                //user.Password = Encryption.EncryptStringView(user.Password.Trim());
+                var body = ApiHelper.Serialize(user);
+                var result = await ApiHelper.Call(ApiHelper.HttpMethods.Post, $"{BaseApiAddress}/User/Patch", body);
+                if (!result.IsSuccessfulResult())
+                    return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
+                if (ApiHelper.Deserialize<bool>(result.Content))
+                    TempData["UserSuccess"] = "user edited successfully.";
                 else
-                    return RedirectToAction("Login");
+                    TempData["UserError"] = "error occured in editing user.try again later.";
+                return RedirectToAction("Users");
             }
             else
                 return RedirectToAction("Login");
         }
         public async Task<ActionResult> SubmitDeleteUser(Guid UserId)
         {
-            if (Request.Cookies.AllKeys.Contains("FSCookie"))
+            if (CacheHelper.GetCachedUserData().IsAdmin)
             {
-                if (Request.Cookies["FSCookie"].Values["UserLevel"] == "Admin")
+                if (CacheHelper.userData.UserId != UserId)
                 {
-                    if (Request.Cookies["FSCookie"].Values["UserId"] != UserId.ToString())
-                    {
-                        var result = await ApiHelper.Call(ApiHelper.HttpMethods.Delete, $"{BaseApiAddress}/User/Delete/{UserId}");
-                        if (!result.IsSuccessfulResult())
-                            return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
-                        if (ApiHelper.Deserialize<bool>(result.Content))
-                            TempData["UserSuccess"] = "user deleted successfully.";
-                        else
-                            TempData["UserError"] = "error occured in deleting user.try again later.";
-                    }
+                    var result = await ApiHelper.Call(ApiHelper.HttpMethods.Delete, $"{BaseApiAddress}/User/Delete/{UserId}");
+                    if (!result.IsSuccessfulResult())
+                        return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
+                    if (ApiHelper.Deserialize<bool>(result.Content))
+                        TempData["UserSuccess"] = "user deleted successfully.";
                     else
-                        TempData["UserError"] = "user can not delete itself";
+                        TempData["UserError"] = "error occured in deleting user.try again later.";
                 }
                 else
-                    TempData["UserError"] = "current user dont have access to complete this action.";
+                    TempData["UserError"] = "user can not delete itself";
             }
             else
-                TempData["UserError"] = "in order to delete user,login first";
+                TempData["UserError"] = "current user dont have access to complete this action.";
             return RedirectToAction("Users");
         }
         public async Task<ActionResult> UserProfile()
         {
-            if (Request.Cookies.AllKeys.Contains("FSCookie"))
-            {
-                var userId = Request.Cookies["FSCookie"].Values["UserId"];
-                var result = await ApiHelper.Call(ApiHelper.HttpMethods.Get, $"{BaseApiAddress}/User/GetUserById/{userId}");
-                if (!result.IsSuccessfulResult())
-                    return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
-                var Content = ApiHelper.Deserialize<UserDTO>(result.Content);
-                return View(Content);
-            }
-            else
-                return RedirectToAction("Login");
+            var result = await ApiHelper.Call(ApiHelper.HttpMethods.Get, $"{BaseApiAddress}/User/GetUserById/{CacheHelper.GetCachedUserData().UserId}");
+            if (!result.IsSuccessfulResult())
+                return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
+            var Content = ApiHelper.Deserialize<UserDTO>(result.Content);
+            return View(Content);
         }
 
-        //folder section
+        //folder crud section
 
         public async Task<ActionResult> Folders()
         {
-            if (Request.Cookies.AllKeys.Contains("FSCookie"))
-            {
-                var userId = Request.Cookies["FSCookie"].Values["UserId"];
-                var result = await ApiHelper.Call(ApiHelper.HttpMethods.Get, $"{BaseApiAddress}/Folder/GetFoldersByUserId/{userId}");
-                if (!result.IsSuccessfulResult())
-                    return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
-                var Content = ApiHelper.Deserialize<List<FolderDTO>>(result.Content);
-                return View(Content);
-            }
-            else
-                return RedirectToAction("Login");
+            var result = await ApiHelper.Call(ApiHelper.HttpMethods.Get, $"{BaseApiAddress}/Folder/GetFoldersByUserId/{CacheHelper.GetCachedUserData().UserId}");
+            if (!result.IsSuccessfulResult())
+                return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
+            var Content = ApiHelper.Deserialize<List<FolderDTO>>(result.Content);
+            return View(Content);
         }
         public ActionResult AddFolder()
         {
@@ -238,21 +160,17 @@ namespace FileShareWebUI2.Controllers
         [HttpPost]
         public async Task<ActionResult> SubmitAddFolder(CreateFolderDTO folder)
         {
-            if (Request.Cookies.AllKeys.Contains("FSCookie"))
-            {
-                folder.UserId = Guid.Parse(Request.Cookies["FSCookie"].Values["UserId"]);
-                var body = ApiHelper.Serialize(folder);
-                var result = await ApiHelper.Call(ApiHelper.HttpMethods.Post, $"{BaseApiAddress}/Folder/Post", body);
-                if (!result.IsSuccessfulResult())
-                    return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
-                if (ApiHelper.Deserialize<bool>(result.Content))
-                    TempData["FolderSuccess"] = "folder created successfully.";
-                else
-                    TempData["FolderError"] = "error occured in creating folder.try again later.";
-                return RedirectToAction("Folders");
-            }
+            folder.UserId = CacheHelper.GetCachedUserData().UserId;
+            var body = ApiHelper.Serialize(folder);
+            var result = await ApiHelper.Call(ApiHelper.HttpMethods.Post, $"{BaseApiAddress}/Folder/Post", body);
+            if (!result.IsSuccessfulResult())
+                return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
+            if (ApiHelper.Deserialize<bool>(result.Content))
+                TempData["FolderSuccess"] = "folder created successfully.";
             else
-                return RedirectToAction("Login");
+                TempData["FolderError"] = "error occured in creating folder.try again later.";
+            IsFoldersChanged = true;
+            return RedirectToAction("Folders");
         }
         [HttpPost]
         public async Task<ActionResult> SubmitEditFolder(UpdateFolderDTO folder)
@@ -265,6 +183,7 @@ namespace FileShareWebUI2.Controllers
                 TempData["FolderSuccess"] = "folder edited successfully.";
             else
                 TempData["FolderError"] = "error occured in editing folder.try again later.";
+            IsFoldersChanged = true;
             return RedirectToAction("Folders");
         }
         public async Task<ActionResult> SubmitDeleteFolder(Guid FolderId)
@@ -276,48 +195,53 @@ namespace FileShareWebUI2.Controllers
                 TempData["FolderSuccess"] = "folder deleted successfully.";
             else
                 TempData["FolderError"] = "error occured in deleting folder.try again later.";
+            IsFoldersChanged = true;
             return RedirectToAction("Folders");
         }
 
-        //folder page and viewers
+        //folder page cache view
 
         public async Task<ActionResult> Folder(Guid Id)
         {
-            var result = await ApiHelper.Call(ApiHelper.HttpMethods.Get, $"{BaseApiAddress}/Folder/GetFolderById/{Id}");
-            if (!result.IsSuccessfulResult())
-                return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
             FolderViewModel fvm = new FolderViewModel();
-            fvm.Folder = ApiHelper.Deserialize<FolderDTO>(result.Content);
-            //fvm.Contents = DirectoryHelper.GetFolderContent(fvm.Folder.Path);
-            fvm.ReturnUrl = Url.Action("Index", "Home");
+            fvm.Folder = await CacheHelper.GetCachedFolder(Id);
+            fvm.Contents = await CacheHelper.GetCachedAllDirectoryContent(fvm.Folder.Id);
+            fvm.Directory = await CacheHelper.GetCachedDirectoryById(Id, 0);
             return View(fvm);
         }
-        public async Task<ActionResult> SubFolder(Guid FolderId, string FolderPath)
+        public async Task<ActionResult> SubFolder(Guid RootFolderId, long FolderId)
         {
-            var result = await ApiHelper.Call(ApiHelper.HttpMethods.Get, $"{BaseApiAddress}/Folder/GetFolderById/{FolderId}");
-            if (!result.IsSuccessfulResult())
-                return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
             FolderViewModel fvm = new FolderViewModel();
-            fvm.Folder = ApiHelper.Deserialize<FolderDTO>(result.Content);
-            if (FolderPath != fvm.Folder.Path)
-                fvm.ReturnUrl = Url.Action("SubFolder", "Home", new { FolderId = FolderId, FolderPath = Directory.GetParent(FolderPath).FullName });
-            else
-                fvm.ReturnUrl = Url.Action("Index", "Home");
-            fvm.Folder.Path = FolderPath;
-            //fvm.Contents = DirectoryHelper.GetFolderContent(fvm.Folder.Path);
-            return View("Folder", fvm);
+            fvm.Folder = await CacheHelper.GetCachedFolder(RootFolderId);
+            fvm.Contents = await CacheHelper.GetCachedDirectoryContentById(RootFolderId, FolderId);
+            fvm.Directory = await CacheHelper.GetCachedDirectoryById(RootFolderId, FolderId);
+            return Json(new { isSuccessfull = true, PageContent = ViewHelper.RenderViewToString(this, "_FolderPartial", fvm) });
         }
+
+        //create new folder
+
         [HttpPost]
-        public ActionResult AddSubFolder(string FolderName, string RootPath, Guid FolderId)
+        public async Task<ActionResult> AddSubFolder(string FolderName, string RootPath, Guid RootFolderId,long RootFolderDirectoryId)
         {
-            //if (DirectoryHelper.CreateNewFolder(Path.Combine(RootPath, FolderName)))
-            //    TempData["FolderPageSuccess"] = "folder created successfully";
-            //else
-            //    TempData["FolderPageError"] = "error occured in creating folder";
-            return RedirectToAction("SubFolder", new { FolderId = FolderId, FolderPath = RootPath });
+            var result = await ApiHelper.Call(ApiHelper.HttpMethods.Post, $"{BaseApiAddress}/Folder/AddSubFolder",ApiHelper.Serialize(Path.Combine(RootPath, FolderName)));
+            if (!result.IsSuccessfulResult())
+                return Json(new { Successfull = false });
+            else
+            {
+                if (ApiHelper.Deserialize<bool>(result.Content))
+                {
+                    var contents = await CacheHelper.GetCachedDirectoryContentById(RootFolderId, RootFolderDirectoryId, true);
+                    return Json(new { isSuccessfull = true, PageContent = ViewHelper.RenderViewToString(this, "_FolderTableContentPartial", contents) });
+                }
+                else
+                    return Json(new { isSuccessfull = false });
+            }
         }
+
+        //upload file in folder
+
         [HttpPost]
-        public ActionResult UploadFile(HttpPostedFileBase FileUpload, string RootPath, Guid FolderId)
+        public ActionResult UploadFile(HttpPostedFileBase FileUpload, string RootPath, Guid RootFolderId, long RootFolderDirectoryId)
         {
             try
             {
@@ -333,14 +257,77 @@ namespace FileShareWebUI2.Controllers
             {
                 TempData["FolderPageError"] = "error occured in uploading file";
             }
-            return RedirectToAction("SubFolder", new { FolderId = FolderId, FolderPath = RootPath });
+            return RedirectToAction("SubFolder", new { FolderId = RootFolderId, FolderPath = RootPath });
         }
+
+
+        [HttpPost]
+        public string MultiUpload(string id, string fileName)
+        {
+            var chunkNumber = id;
+            var chunks = Request.InputStream;
+            string newpath = Path.Combine(UploadTempFolder, fileName + chunkNumber);
+            using (FileStream fs = System.IO.File.Create(newpath))
+            {
+                byte[] bytes = new byte[3757000];
+                int bytesRead;
+                while ((bytesRead = Request.InputStream.Read(bytes, 0, bytes.Length)) > 0)
+                {
+                    fs.Write(bytes, 0, bytesRead);
+                }
+            }
+            return "done";
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> UploadComplete(string fileName, string RootPath, Guid RootFolderId, long RootFolderDirectoryId)
+        {
+            string newPath = Path.Combine(UploadTempFolder, fileName);
+            string[] filePaths = Directory.GetFiles(UploadTempFolder).Where(p => p.Contains(fileName)).OrderBy(p => Int32.Parse(p.Replace(fileName, "$").Split('$')[1])).ToArray();
+            foreach (string filePath in filePaths)
+            {
+                MergeFiles(newPath, filePath);
+            }
+            System.IO.File.Move(Path.Combine(UploadTempFolder, fileName), Path.Combine(RootPath, fileName));
+            var contents = await CacheHelper.GetCachedDirectoryContentById(RootFolderId, RootFolderDirectoryId, true);
+            return Json(new { isSuccessfull = true, PageContent = ViewHelper.RenderViewToString(this, "_FolderTableContentPartial", contents) });
+        }
+
+        private static void MergeFiles(string file1, string file2)
+        {
+            FileStream fs1 = null;
+            FileStream fs2 = null;
+            try
+            {
+                fs1 = System.IO.File.Open(file1, FileMode.Append);
+                fs2 = System.IO.File.Open(file2, FileMode.Open);
+                byte[] fs2Content = new byte[fs2.Length];
+                fs2.Read(fs2Content, 0, (int)fs2.Length);
+                fs1.Write(fs2Content, 0, (int)fs2.Length);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message + " : " + ex.StackTrace);
+            }
+            finally
+            {
+                if (fs1 != null) fs1.Close();
+                if (fs2 != null) fs2.Close();
+                System.IO.File.Delete(file2);
+            }
+        }
+
+        //download file in folder
+
         public ActionResult DownloadFile(string FilePath)
         {
             byte[] fileBytes = System.IO.File.ReadAllBytes(FilePath);
             string fileName = Path.GetFileName(FilePath);
             return File(fileBytes, System.Net.Mime.MediaTypeNames.Application.Octet, fileName);
         }
+
+        //view file in folder
+
         public ActionResult ViewFile(string FilePath, Guid FolderId)
         {
             //switch (DirectoryHelper.GetFileType(FilePath))
@@ -379,26 +366,74 @@ namespace FileShareWebUI2.Controllers
         }
 
         //general section
-
-        public async Task<ActionResult> Index()
+        [AllowAnonymous]
+        public ActionResult Login()
         {
-            if (Request.Cookies.AllKeys.Contains("FSCookie"))
+            return View();
+        }
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<ActionResult> SubmitLogin(LoginCredential credential)
+        {
+            //credential.Password = Encryption.EncryptStringView(credential.Password);
+            var body = ApiHelper.Serialize(credential);
+            var result = await ApiHelper.Call(ApiHelper.HttpMethods.Post, $"{BaseApiAddress}/User/LoginUser", body);
+            if (!result.IsSuccessfulResult())
+                return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
+            var Content = ApiHelper.Deserialize<LoginResult>(result.Content);
+            if (Content.successLogin)
             {
-                var userId = Request.Cookies["FSCookie"].Values["UserId"];
-                var UserLevel = Request.Cookies["FSCookie"].Values["UserLevel"];
-                string curl = "";
-                if (UserLevel == "Admin")
-                    curl = $"{BaseApiAddress}/Folder/GetFoldersByUserId/{userId}?IncludePublics=true&HasAdminAccess=true";
-                else
-                    curl = $"{BaseApiAddress}/Folder/GetFoldersByUserId/{userId}?IncludePublics=true";
-                var result = await ApiHelper.Call(ApiHelper.HttpMethods.Get, curl);
-                if (!result.IsSuccessfulResult())
-                    return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
-                var Content = ApiHelper.Deserialize<List<FolderDTO>>(result.Content);
-                return View(Content);
+                //build cookie
+                var userDataCookie = new HttpCookie("FSCookie");
+                userDataCookie.Values.Add("UserId", Content.User.Id.ToString());
+                userDataCookie.Values.Add("UserLevel", Content.User.IsAdmin ? "Admin" : "Simple");
+                userDataCookie.Values.Add("Fullname", Content.User.Fullname);
+                userDataCookie.Secure = true;
+                userDataCookie.HttpOnly = true;
+                userDataCookie.Expires = DateTime.Now.AddHours(8);
+                Response.Cookies.Add(userDataCookie);
+                FormsAuthentication.SetAuthCookie(Content.User.Username, true);
+                CacheHelper.createInstance();
+                return RedirectToAction("Index");
             }
             else
+            {
+                TempData["LoginError"] = Content.message;
                 return RedirectToAction("Login");
+            }
+        }
+        public ActionResult Logout()
+        {
+            FormsAuthentication.SignOut();
+            if (Request.Cookies["FSCookie"] != null)
+            {
+                var c = new HttpCookie("FSCookie")
+                {
+                    Expires = DateTime.Now.AddDays(-1)
+                };
+                Response.Cookies.Add(c);
+            }
+            try
+            {
+                CacheHelper.ReleaseResources();
+            }
+            catch (Exception)
+            {
+            }
+            return RedirectToAction("Login");
+        }
+        public async Task<ActionResult> Index()
+        {
+            var userdata = CacheHelper.GetCachedUserData();
+            List<FolderDTO> Content = null;
+            if (!IsFoldersChanged)
+                Content = await CacheHelper.GetCachedFolders(userdata.UserId, userdata.IsAdmin);
+            else
+            {
+                Content = await CacheHelper.GetCachedFolders(userdata.UserId, userdata.IsAdmin, true, true);
+                IsFoldersChanged = false;
+            }
+            return View(Content);
         }
         [AllowAnonymous]
         public ActionResult ErrorHandling(int Code = 0)

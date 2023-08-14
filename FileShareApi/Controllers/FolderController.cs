@@ -127,7 +127,36 @@ namespace FileShareApi.Controllers
             try
             {
                 var tmpFolder = _mapper.EntityMap<FolderDTO>(_folderRepository.GetFolderById(FolderId));
-                return Ok();
+                if (tmpFolder != null)
+                {
+                    var tmpDirectoryContents = _directoryHelper.GetFolderContent(tmpFolder.Path);
+                    tmpDirectoryContents.Add(new Application.Model.DirectoryContent()
+                     {
+                         Id = 0,
+                         ContentType = Application.Model.FolderContentType.Folder,
+                         Format = ".dir",
+                         HeightLevel = 0,
+                         Title = tmpFolder.Title,
+                         Path = tmpFolder.Path,
+                         RootFolderId = -1
+                     });
+                    return Ok(tmpDirectoryContents);
+                }
+                else
+                    return NotFound();
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
+            }
+        }
+        [HttpPost]
+        [Route("AddSubFolder")]
+        public IHttpActionResult AddSubFolder([FromBody] string path)
+        {
+            try
+            {
+                return Ok(_directoryHelper.CreateSubFolder(path));
             }
             catch (Exception ex)
             {
