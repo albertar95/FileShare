@@ -1,0 +1,45 @@
+﻿@model FileShareWebUI2.ViewModels.FileViewModel
+
+@for (int i = 0; i <= Model.RelatedFiles.Count / 3; i++)
+{
+    <div class="row">
+        @foreach (var cfile in Model.RelatedFiles.OrderBy(p => p.Id).Skip(i * 3).Take(3))
+        {
+            <div class="col-md-4">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <a href="@Url.Action("ViewFile","Home",new { FileId = cfile.Id, RootFolderId = Model.RootFolderId })">@cfile.Title</a>
+                    </div>
+                    <div class="panel-body">
+                        @if (cfile.FileContentType == Application.Model.FileContentType.Picture)
+                        {
+                            <img src="@cfile.Vpath" id="@cfile.SecondaryIndex" class="gImage" style="width:100%;height:175px;" onclick="ViewImage(@cfile.SecondaryIndex)" />
+                        }
+                        @if (cfile.FileContentType == Application.Model.FileContentType.Video)
+                        {
+                            <video controls playsinline class="player" id="@cfile.Id">
+                                <!-- Video files -->
+                                <source src="@cfile.Vpath" type="@string.Format("video/{0}",cfile.Format.Replace(".",""))" size="576">
+                                <source src="@cfile.Vpath" type="@string.Format("video/{0}",cfile.Format.Replace(".",""))" size="720">
+                                <source src="@cfile.Vpath" type="@string.Format("video/{0}",cfile.Format.Replace(".",""))" size="1080">
+                                <source src="@cfile.Vpath" type="@string.Format("video/{0}",cfile.Format.Replace(".",""))" size="1440">
+
+                                <!-- Caption files -->
+                                @*<track kind="subtitles" label="Persian" srclang="fa" src="~/files/demo.srt" default>*@
+
+                                <!-- Fallback for browsers that don't support the <video> element -->
+                                <a href="@Url.Action("DownloadFile","Home",new { RootFolderId = Model.RootFolderId, FileId = cfile.Id })" download>Download</a>
+                            </video>
+                        }
+                        @if (cfile.FileContentType == Application.Model.FileContentType.Audio)
+                        {
+                            <audio class="player" id="@cfile.Id" controls>
+                                <source src="@cfile.Vpath" type="@string.Format("audio/{0}",cfile.Format.Replace(".",""))" />
+                            </audio>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

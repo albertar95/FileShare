@@ -1,8 +1,18 @@
 ﻿@model FileShareWebUI2.ViewModels.FolderViewModel
 <div class="row">
-    <div class="col-md-3">
-        <button style="margin:10px;" onclick="NewFolderModal()" class="btn btn-success"><i class="fa fa-plus"></i> new folder</button>
-        <button style="margin:10px;" onclick="UploadModal()" class="btn btn-info"><i class="fa fa-upload"></i> upload</button>
+    <div class="col-md-4">
+        <a style="margin:5px;" data-toggle="modal" data-target="#NewFolderModal" class="btn btn-success"><i class="fa fa-plus"></i> new folder</a>
+        <a style="margin:5px;" data-toggle="modal" data-target="#UploadModal" class="btn btn-info"><i class="fa fa-upload"></i> upload</a>
+        <div style="margin:10px;">
+            <a style="margin:2px;" class="btn btn-primary"
+               href="@Url.Action("MediaGallery","Home",new { RootFolderId = Model.Folder.Id, FolderId = Model.Directory.Id, FileType = Application.Model.FileContentType.Picture })"><i class="fa fa-picture-o"></i></a>
+            |
+            <a style="margin:2px;" class="btn btn-info"
+               href="@Url.Action("MediaGallery","Home",new { RootFolderId = Model.Folder.Id, FolderId = Model.Directory.Id, FileType = Application.Model.FileContentType.Audio })"><i class="fa fa-music"></i></a>
+            |
+            <a style="margin:2px;" class="btn btn-success"
+               href="@Url.Action("MediaGallery","Home",new { RootFolderId = Model.Folder.Id, FolderId = Model.Directory.Id, FileType = Application.Model.FileContentType.Video })"><i class="fa fa-video-camera"></i></a>
+        </div>
     </div>
     <div class="col-md-6">
         <div class="alert alert-success alert-dismissable" id="divSuccess" hidden>
@@ -14,7 +24,7 @@
             <p id="txtError"></p>
         </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-2">
         @if (!(Model.Directory.Id == 0))
         {
             <a style="margin:10px;float:right;" onclick="SubFolder(event,'@Model.Directory.RootFolderId')" class="btn btn-default">return <i class="fa fa-arrow-circle-o-right"></i></a>
@@ -31,7 +41,7 @@
         <!-- Advanced Tables -->
         <div class="panel panel-default">
             <div class="panel-heading">
-                Folder : @Model.Directory.Title
+                Folder : @Model.Folder.Title
             </div>
             <div class="panel-body" id="tblContents">
                 <div class="table-responsive">
@@ -53,15 +63,14 @@
                                         @if (cnt.ContentType == Application.Model.FolderContentType.File)
                                         {
                                             <td style="text-align:center;">
-                                                <a target="_blank" href="@Url.Action("DownloadFile", "Home", new { FilePath = cnt.Path })" class="btn btn-primary">Download</a>
-                                                <a href="@Url.Action("ViewFile", "Home", new { FilePath = cnt.Path,FolderId = Model.Folder.Id })" class="btn btn-default">View</a>
+                                                <a target="_blank" href="@Url.Action("DownloadFile", "Home", new { FileId = cnt.Id,RootFolderId = Model.Folder.Id })" class="btn btn-primary">Download</a>
+                                                <a href="@Url.Action("ViewFile", "Home", new { FileId = cnt.Id,RootFolderId = Model.Folder.Id })" class="btn btn-default">View</a>
                                             </td>
                                         }
                                         else
                                         {
                                             <td style="text-align:center;">
-                                                <a onclick="SubFolder(event,'@cnt.Id')"
-                                                   class="btn btn-default">Browse</a>
+                                                <a onclick="SubFolder(event,'@cnt.Id')" class="btn btn-default">Browse</a>
                                             </td>
                                         }
                                     </tr>
@@ -73,15 +82,14 @@
                                         @if (cnt.ContentType == Application.Model.FolderContentType.File)
                                         {
                                             <td style="text-align:center;">
-                                                <a href="@Url.Action("DownloadFile", "Home", new { FilePath = cnt.Path })" class="btn btn-primary">Download</a>
-                                                <a href="@Url.Action("ViewFile", "Home", new { FilePath = cnt.Path,FolderId = Model.Folder.Id })" class="btn btn-default">View</a>
+                                                <a href="@Url.Action("DownloadFile", "Home", new { FileId = cnt.Id,RootFolderId = Model.Folder.Id })" class="btn btn-primary">Download</a>
+                                                <a href="@Url.Action("ViewFile", "Home", new { FileId = cnt.Id,RootFolderId = Model.Folder.Id })" class="btn btn-default">View</a>
                                             </td>
                                         }
                                         else
                                         {
                                             <td style="text-align:center;">
-                                                <a onclick="SubFolder(event,'@cnt.Id')"
-                                                   class="btn btn-default">Browse</a>
+                                                <a onclick="SubFolder(event,'@cnt.Id')" class="btn btn-default">Browse</a>
                                             </td>
                                         }
                                     </tr>
@@ -125,18 +133,21 @@
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                 <h4 class="modal-title" id="myModalLabel">Upload File</h4>
             </div>
-            @using (Html.BeginForm("UploadFile", "Home", FormMethod.Post, new { enctype = "multipart/form-data" }))
-            {
+            <form>
                 <div class="modal-body">
                     <input class="form-control" name="FileUpload" id="FileUpload" type="file" />
-                    <input class="form-control" name="RootPath" id="RootPath" value="@Model.Directory.Path" style="display:none;" />
-                    <input class="form-control" name="FolderId" id="FolderId" value="@Model.Folder.Id" style="display:none;" />
+                    <input id="UploadRootPath" value="@Model.Directory.Path" hidden readonly />
+                    <input id="UploadRootFolderId" value="@Model.Directory.Id" hidden readonly />
+                    <div id="progressbar_container" style="width: 100%; height: 30px; position: relative; background-color: grey; display: none">
+                        <div id="progressbar" style="width: 0%; height: 100%; position: absolute; background-color: green"></div>
+                        <span id="progressbar_label" style="position: absolute; left: 35%; top: 20%">Uploading...</span>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-info">Upload</button>
+                    <button type="submit" onclick="SubmitUploadFile(event)" class="btn btn-info">Upload</button>
                 </div>
-            }
+            </form>
         </div>
     </div>
 </div>

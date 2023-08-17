@@ -317,6 +317,7 @@
     <Compile Include="Helpers\CacheHelper.cs" />
     <Compile Include="Helpers\ViewHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ViewModels\FileViewModel.cs" />
     <Compile Include="ViewModels\FolderViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -452,7 +453,7 @@
     <Content Include="Views\Home\Folders.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Home\Login.cshtml" />
-    <Content Include="Views\Home\MovieViewer.cshtml" />
+    <Content Include="Views\Home\MultimediaViewer.cshtml" />
     <Content Include="Views\Home\UserDetail.cshtml" />
     <Content Include="Views\Home\UserProfile.cshtml" />
     <Content Include="Views\Home\Users.cshtml" />
@@ -460,6 +461,9 @@
     <Content Include="Views\_ViewStart.cshtml" />
     <Content Include="Views\Home\_FolderPartial.cshtml" />
     <Content Include="Views\Home\_FolderTableContentPartial.cshtml" />
+    <Content Include="Views\Home\_MultimediaViewerPartial.cshtml" />
+    <Content Include="Views\Home\MediaGallery.cshtml" />
+    <Content Include="Views\Home\_MediaGalleryPartial.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -469,6 +473,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="Content\files\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Application\Application.csproj">

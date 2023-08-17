@@ -119,7 +119,7 @@ namespace FileShareWebUI2.Helpers
             }
             return DirectoryRepository.FirstOrDefault(p => p.Key == FolderId).Value.Where(p => p.RootFolderId == Id).ToList();
         }
-        public static async Task<DirectoryContent> GetCachedDirectoryById(Guid FolderId, long Id, bool refresh = false)
+        public static async Task<DirectoryContent> GetCachedContentById(Guid FolderId, long Id, bool refresh = false)
         {
             if(!refresh)
             {
@@ -139,6 +139,100 @@ namespace FileShareWebUI2.Helpers
                     return new DirectoryContent();
             }
             return DirectoryRepository.FirstOrDefault(p => p.Key == FolderId).Value.FirstOrDefault(p => p.Id == Id);
+        }
+        public static async Task<List<DirectoryContent>> GetCachedRelatedContentById(Guid FolderId, long RootFolderId,long FileId,FileContentType FileType, bool refresh = false)
+        {
+            if (!refresh)
+            {
+                if (!DirectoryRepository.Any(p => p.Key == FolderId))
+                {
+                    if (!await FetchDirectoryContent(FolderId))
+                        return new List<DirectoryContent>();
+                }
+            }
+            else
+            {
+                if (DirectoryRepository.Any(p => p.Key == FolderId))
+                {
+                    DirectoryRepository.Remove(FolderId);
+                }
+                if (!await FetchDirectoryContent(FolderId))
+                    return new List<DirectoryContent>();
+            }
+            return GetMedianRelatedContents(DirectoryRepository.FirstOrDefault(p => p.Key == FolderId).Value.
+            Where(p => p.RootFolderId == RootFolderId && p.FileContentType == FileType).ToList(),FileId);
+        }
+        public static async Task<List<DirectoryContent>> GetCachedRelatedContentForGallery(Guid FolderId, long RootFolderId, FileContentType FileType,int skip = 0,int PageSize = 10, bool refresh = false)
+        {
+            if (!refresh)
+            {
+                if (!DirectoryRepository.Any(p => p.Key == FolderId))
+                {
+                    if (!await FetchDirectoryContent(FolderId))
+                        return new List<DirectoryContent>();
+                }
+            }
+            else
+            {
+                if (DirectoryRepository.Any(p => p.Key == FolderId))
+                {
+                    DirectoryRepository.Remove(FolderId);
+                }
+                if (!await FetchDirectoryContent(FolderId))
+                    return new List<DirectoryContent>();
+            }
+            var result = DirectoryRepository.FirstOrDefault(p => p.Key == FolderId).Value.
+            Where(p => p.RootFolderId == RootFolderId && p.FileContentType == FileType).ToList().Skip(skip*PageSize).Take(PageSize).ToList();
+            long counter = skip * PageSize + 1;
+            result.ForEach(x => { x.SecondaryIndex = counter;counter++; });
+            return result;
+        }
+        private static List<DirectoryContent> GetMedianRelatedContents(List<DirectoryContent> overallContent,long FileId)
+        {
+            if (overallContent.Count < 5)
+               return overallContent.Where(p => p.Id != FileId).ToList();
+            int counter = 0;
+            Dictionary<int, long> ids = new Dictionary<int, long>();
+            foreach (var item in overallContent.OrderBy(p => p.Id).ToList())
+            {
+                ids.Add(counter, item.Id);
+                counter++;
+            }
+            int fileIndex = ids.FirstOrDefault(p => p.Value == FileId).Key;
+            List<long> candidateIds = new List<long>();
+            if (fileIndex == 0)
+            {
+                candidateIds.Add(ids.FirstOrDefault(p => p.Key == 1).Value);
+                candidateIds.Add(ids.FirstOrDefault(p => p.Key == 2).Value);
+                candidateIds.Add(ids.FirstOrDefault(p => p.Key == (overallContent.Count - 1)).Value);
+                candidateIds.Add(ids.FirstOrDefault(p => p.Key == (overallContent.Count - 2)).Value);
+            }
+            else if (fileIndex == 1)
+            {
+                candidateIds.Add(ids.FirstOrDefault(p => p.Key == 0).Value);
+                candidateIds.Add(ids.FirstOrDefault(p => p.Key == 2).Value);
+                candidateIds.Add(ids.FirstOrDefault(p => p.Key == 3).Value);
+                candidateIds.Add(ids.FirstOrDefault(p => p.Key == (overallContent.Count - 1)).Value);
+            }
+            else if (fileIndex == (overallContent.Count - 1))
+            {
+                candidateIds.Add(ids.FirstOrDefault(p => p.Key == 0).Value);
+                candidateIds.Add(ids.FirstOrDefault(p => p.Key == 1).Value);
+                candidateIds.Add(ids.FirstOrDefault(p => p.Key == (overallContent.Count - 3)).Value);
+                candidateIds.Add(ids.FirstOrDefault(p => p.Key == (overallContent.Count - 2)).Value);
+            }
+            else if(fileIndex == (overallContent.Count - 2))
+            {
+                candidateIds.Add(ids.FirstOrDefault(p => p.Key == 0).Value);
+                candidateIds.Add(ids.FirstOrDefault(p => p.Key == (overallContent.Count - 1)).Value);
+                candidateIds.Add(ids.FirstOrDefault(p => p.Key == (overallContent.Count - 3)).Value);
+                candidateIds.Add(ids.FirstOrDefault(p => p.Key == (overallContent.Count - 4)).Value);
+            }
+            else
+            {
+                candidateIds = ids.Where(p => p.Key >= (fileIndex - 2) && p.Key <= (fileIndex + 2) && p.Key != fileIndex).Select(q => q.Value).ToList();
+            }
+            return overallContent.Where(p => candidateIds.Contains(p.Id)).ToList();
         }
         public static async Task<List<FolderDTO>> GetCachedFolders(Guid UserId, bool HasAdminAccess = false, bool IncludePublics = true, bool refresh = false)
         {
@@ -181,7 +275,7 @@ namespace FileShareWebUI2.Helpers
         {
             if (!refresh)
             {
-                if (string.IsNullOrEmpty(userData.UserId.ToString()))
+                if (userData.UserId == Guid.Empty)
                     FetchUserData();
             }
             else

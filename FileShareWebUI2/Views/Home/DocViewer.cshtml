@@ -1,23 +1,49 @@
-﻿@model List<string>
+﻿@model FileShareWebUI2.ViewModels.FileViewModel
 @{
     ViewBag.Title = "DocViewer";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 <div class="row" style="margin:10px 10px 25px 10px;">
-    <a href="@Model.Last()" class="btn btn-default"><i class="fa fa-arrow-circle-o-left"></i> Return</a>
-    <a href="#" class="btn btn-primary">Download</a>
+    <a href="@Url.Action("Folder","Home",new { Id = Model.RootFolderId, FolderId = Model.CurrentFile.RootFolderId })" class="btn btn-default"><i class="fa fa-arrow-circle-o-left"></i> Return</a>
+    <a href="@Url.Action("DownloadFile","Home",new { RootFolderId = Model.RootFolderId, FileId = Model.CurrentFile.Id })" class="btn btn-primary"><i class="fa fa-download"></i> Download</a>
 </div>
 <div id="resolte-contaniner" style="width: 100%; height:550px; overflow: auto;"></div>
 <script>
     (function ($) {
                     $("#resolte-contaniner").officeToHtml({
-                url: '@Model.First()',
+                url: '@Model.CurrentFile.Vpath',
                 pdfSetting: {
                     setLang: "",
                     setLangFilesPath: "" /*"include/pdf/lang/locale" - relative to app path*/
                 }
             });
     }(jQuery));
+        function ShowRelated(e,fileid)
+        {
+            e.preventDefault();
+            $.ajax(
+                {
+                    url: '@Url.Action("ViewFileJson", "Home")',
+                    type: 'post',
+                    dataType: 'json',
+                    data: { FileId: fileid, RootFolderId: '@Model.RootFolderId' },
+                    success: function (result)
+                    {
+                        if (result.isSuccessfull)
+                        {
+                            $("#page-inner").html(result.PageContent);
+                            $("#resolte-contaniner").officeToHtml({
+                            url: result.Vpath,
+                            pdfSetting: {
+                            setLang: "",
+                            setLangFilesPath: "" /*"include/pdf/lang/locale" - relative to app path*/
+                            }
+                            });
+                        }
+                    },
+                    error: function () { }
+                });
+        }
 </script>
 
 @section Styles

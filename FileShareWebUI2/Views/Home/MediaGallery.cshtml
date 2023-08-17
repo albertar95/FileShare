@@ -1,0 +1,205 @@
+﻿@model FileShareWebUI2.ViewModels.FileViewModel
+@{
+    ViewBag.Title = "MediaGallery";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row" style="margin:10px 10px 25px 10px;">
+    <a href="@Url.Action("Folder","Home",new { Id = Model.RootFolderId, FolderId = Model.FolderId })" class="btn btn-default"><i class="fa fa-arrow-circle-o-left"></i> Return</a>
+    @if (Model.RelatedFiles.FirstOrDefault().FileContentType == Application.Model.FileContentType.Audio)
+    {
+        <button class="btn btn-success" onclick="PlayAllAudio()"><i class="fa fa-play-circle-o"></i> Play All</button>
+    }
+</div>
+@for (int i = 0; i <= Model.RelatedFiles.Count / 3; i++)
+{
+    <div class="row">
+        @foreach (var cfile in Model.RelatedFiles.OrderBy(p => p.Id).Skip(i * 3).Take(3))
+        {
+            <div class="col-md-4">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <a href="@Url.Action("ViewFile","Home",new { FileId = cfile.Id, RootFolderId = Model.RootFolderId })">@cfile.Title</a>
+                    </div>
+                    <div class="panel-body">
+                        @if (cfile.FileContentType == Application.Model.FileContentType.Picture)
+                        {
+                            <img src="@cfile.Vpath" id="@cfile.SecondaryIndex" class="gImage" style="width:100%;height:175px;" onclick="ViewImage(@cfile.SecondaryIndex)" />
+                        }
+                        @if (cfile.FileContentType == Application.Model.FileContentType.Video)
+                        {
+                            <video controls playsinline class="player" id="@cfile.Id">
+                                <!-- Video files -->
+                                <source src="@cfile.Vpath" type="@string.Format("video/{0}",cfile.Format.Replace(".",""))" size="576">
+                                <source src="@cfile.Vpath" type="@string.Format("video/{0}",cfile.Format.Replace(".",""))" size="720">
+                                <source src="@cfile.Vpath" type="@string.Format("video/{0}",cfile.Format.Replace(".",""))" size="1080">
+                                <source src="@cfile.Vpath" type="@string.Format("video/{0}",cfile.Format.Replace(".",""))" size="1440">
+
+                                <!-- Caption files -->
+                                @*<track kind="subtitles" label="Persian" srclang="fa" src="~/files/demo.srt" default>*@
+
+                                <!-- Fallback for browsers that don't support the <video> element -->
+                                <a href="@Url.Action("DownloadFile","Home",new { RootFolderId = Model.RootFolderId, FileId = cfile.Id })" download>Download</a>
+                            </video>
+                        }
+                        @if (cfile.FileContentType == Application.Model.FileContentType.Audio)
+                        {
+                            <audio class="player" id="@cfile.Id" controls>
+                                <source src="@cfile.Vpath" type="@string.Format("audio/{0}",cfile.Format.Replace(".",""))" />
+                            </audio>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+<div id="NewItems"></div>
+<div class="row" style="margin:0 auto;text-align:center;">
+    <button onclick="MoreFiles()" id="btnMore" class="btn btn-default">more</button>
+    <input id="txtPageNo" value="1" hidden />
+</div>
+<div class="modal fade" id="MediaModal" style="height:96vh;padding-left:2%;padding-right:2%;" tabindex="-1" role="dialog" aria-labelledby="MediaModalLabel" aria-hidden="true">
+    <div class="modal-dialog" style="width:100%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            </div>
+            <div class="modal-body">
+                <img style="width:100%;height:70vh;" id="modalImg" />
+            </div>
+            <div class="modal-footer text-center">
+                <button class="btn btn-default" id="btnModalPrev"><i class="fa fa-arrow-circle-left"></i></button>
+                <button class="btn btn-success" id="btnModalPlay"><i class="fa fa-play-circle-o"></i></button>
+                <button class="btn btn-default" id="btnModalNext"><i class="fa fa-arrow-circle-right"></i></button>
+            </div>
+        </div>
+    </div>
+</div>
+@section Styles
+    {
+    <link href="@Url.Content("~/Content/assets/vendor/plyr/css/plyr.css")" rel="stylesheet" />
+}
+@section Scripts
+    {
+    <script src="@Url.Content("~/Content/assets/vendor/plyr/js/plyr.js")"></script>
+    <script src="@Url.Content("~/Content/assets/vendor/plyr/js/plyr.polyfilled.js")"></script>
+    <script>
+                var loadMore = true;
+        var imageplayInterval = null;
+        var isPlayOn = false;
+        $(window).scroll(function () {
+            if ($(window).scrollTop() == $(document).height() - $(window).height()) {
+                if (loadMore)
+                    MoreFiles();
+            }
+        });
+        $(function ()
+        {
+            $(".player").each(function () {
+                var tmpPlayer = new Plyr(document.getElementById($(this).attr('id')));
+            });
+            document.onkeydown = function (e) {
+                if ($("#MediaModal").hasClass('in')) {
+                    e.preventDefault();
+                    switch (e.which) {
+                        case 37: // left
+                            $("#btnModalPrev").click();
+                            break;
+
+                        case 39: // right
+                            $("#btnModalNext").click();
+                            break;
+
+                        default: return; // exit this handler for other keys
+                    }
+                }
+            };
+            $("#btnModalPlay").click(function (e)
+            {
+                e.preventDefault();
+                if (isPlayOn) {
+                    clearInterval(imageplayInterval);
+                    $("#btnModalPlay").html('<i class="fa fa-play-circle-o"></i>');
+                    isPlayOn = false;
+                } else {
+                    imageplayInterval = window.setInterval(StartImagePlay, 5000);
+                    $("#btnModalPlay").html('<i class="fa fa-pause"></i>');
+                    isPlayOn = true;
+                }
+
+            });
+        });
+        function StartImagePlay()
+        {
+            var maxIndex1 = parseFloat($(".gImage").length) - parseFloat(1);
+            if (parseFloat($("#modalImg").attr('alt')) >= maxIndex1) {
+                clearInterval(imageplayInterval);
+                $("#btnModalPlay").html('<i class="fa fa-play-circle-o"></i>');
+                ViewImage(parseFloat($("#modalImg").attr('alt')) + parseFloat(1));
+            } else {
+                ViewImage(parseFloat($("#modalImg").attr('alt')) + parseFloat(1));
+            }
+        }
+        function MoreFiles()
+        {
+            $.ajax(
+                {
+                    url: '@Url.Action("MediaGalleryPagination", "Home")',
+                    type: 'post',
+                    dataType: 'json',
+                    data: { FolderId: '@Model.FolderId', RootFolderId: '@Model.RootFolderId', FileType: '@Model.RelatedFiles.FirstOrDefault().FileContentType', currentPage: $("#txtPageNo").val() },
+                    success: function (result)
+                    {
+                        if (result.isSuccessfull)
+                        {
+                            $("#NewItems").append(result.PageContent);
+                            $("#txtPageNo").val(parseFloat($("#txtPageNo").val()) + parseFloat(1));
+                            $(".player").each(function ()
+                            {
+                                var tmpPlayer = new Plyr(document.getElementById($(this).attr('id')));
+                            });
+                            if (result.noMore) {
+                                $("#btnMore").css('display', 'none');
+                                loadMore = false;
+                            }
+                        }
+                    },
+                    error: function () { }
+                });
+        }
+        function ViewImage(fileIndex)
+        {
+            var image = document.getElementById(fileIndex).src;
+            var maxIndex = $(".gImage").length;
+            var next = parseFloat(fileIndex) + parseFloat(1);
+            var pre = parseFloat(fileIndex) - parseFloat(1);
+            if (fileIndex == 1) {
+                $("#btnModalPrev").css('display', 'none');
+                $("#btnModalNext").css('display', '');
+                $("#btnModalNext").attr('onclick', 'ViewImage(' + next + ')');
+            } else if (fileIndex == maxIndex) {
+                $("#btnModalNext").css('display', 'none');
+                $("#btnModalPrev").css('display', '');
+                $("#btnModalPrev").attr('onclick', 'ViewImage(' + pre + ')');
+                clearInterval(imageplayInterval);
+                $("#btnModalPlay").html('<i class="fa fa-play-circle-o"></i>');
+            } else
+            {
+                $("#btnModalNext").attr('onclick', 'ViewImage(' + next + ')');
+                $("#btnModalPrev").attr('onclick', 'ViewImage(' + pre + ')');
+                $("#btnModalNext").css('display', '');
+                $("#btnModalPrev").css('display', '');
+            }
+            $("#modalImg").attr('src', image);
+            $("#modalImg").attr('alt', fileIndex);
+            if (!$("#MediaModal").hasClass('in')) {
+                $("#MediaModal").modal('show');
+            }
+        }
+        function PlayAllAudio()
+        {
+            alert("stay tuned");
+        }
+    </script>
+}

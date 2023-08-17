@@ -49,15 +49,15 @@ namespace Application.Helpers
                 return false;
             }
         }
-        public List<DirectoryContent> GetFolderContent(string RootPath,int height = 1,long rootId = 0,long startIndex = 0)
+        public List<DirectoryContent> GetFolderContent(string RootPath,string VirtualPath,int height = 1,long rootId = 0,long startIndex = 0)
         {
             List<DirectoryContent> result = new List<DirectoryContent>();
-            var FirstLevelContents = GetChildElements(RootPath, height,rootId,startIndex);
+            var FirstLevelContents = GetChildElements(RootPath,VirtualPath, height,rootId,startIndex);
             result.AddRange(FirstLevelContents);
             height++;
             foreach (var node in FirstLevelContents.Where(p => p.ContentType == FolderContentType.Folder).ToList())
             {
-                result.AddRange(GetFolderContent(node.Path,height,node.Id,result.Max(p => p.Id)));
+                result.AddRange(GetFolderContent(node.Path,string.Concat(VirtualPath,node.Path.Replace(RootPath,"").Replace('\\','/')),height,node.Id,result.Max(p => p.Id)));
             }
             return result;
         }
@@ -108,7 +108,7 @@ namespace Application.Helpers
             //    iisManager.CommitChanges();
             //}
         }
-        private List<DirectoryContent> GetChildElements(string path,int height,long rootId,long startIndex)
+        private List<DirectoryContent> GetChildElements(string path,string vpath,int height,long rootId,long startIndex)
         {
             List<DirectoryContent> result = new List<DirectoryContent>();
             try
@@ -123,7 +123,9 @@ namespace Application.Helpers
                         Format = ".dir",
                         Title = dir.Split('\\').Last(),
                         HeightLevel = height,
-                        RootFolderId = rootId
+                        RootFolderId = rootId,
+                        FileContentType = FileContentType.Unknown,
+                        Vpath = string.Concat(vpath, dir.Replace(path, "").Replace('\\', '/')).ToLower().Replace(" ","%20")
                     });
                 }
                 foreach (var dir in Directory.GetFiles(path))
@@ -136,7 +138,9 @@ namespace Application.Helpers
                         Format = Path.GetExtension(dir),
                         Title = Path.GetFileName(dir),
                         HeightLevel = height,
-                        RootFolderId = rootId
+                        RootFolderId = rootId,
+                        FileContentType = GetFileType(dir),
+                        Vpath = string.Concat(vpath, dir.Replace(path, "").Replace('\\', '/')).ToLower().Replace(" ", "%20")
                     });
                 }
             }

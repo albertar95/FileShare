@@ -1,0 +1,108 @@
+﻿@model FileShareWebUI2.ViewModels.FileViewModel
+@{
+    ViewBag.Title = "MediaViewer";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="row" style="margin:10px 10px 25px 10px;">
+    <a href="@Url.Action("Folder","Home",new { Id = Model.RootFolderId, FolderId = Model.CurrentFile.RootFolderId })" class="btn btn-default"><i class="fa fa-arrow-circle-o-left"></i> Return</a>
+    <a href="@Url.Action("DownloadFile","Home",new { RootFolderId = Model.RootFolderId, FileId = Model.CurrentFile.Id })" class="btn btn-primary"><i class="fa fa-download"></i> Download</a>
+    <a href="@Url.Action("MediaGallery","Home",new { RootFolderId = Model.RootFolderId, FolderId = Model.CurrentFile.RootFolderId, FileType = Model.CurrentFile.FileContentType })"
+       class="btn btn-info">
+        @if (Model.CurrentFile.FileContentType == Application.Model.FileContentType.Audio)
+        {
+            <i class="fa fa-music"></i>
+        }
+        @if (Model.CurrentFile.FileContentType == Application.Model.FileContentType.Video)
+        {
+            <i class="fa fa-video-camera"></i>
+        }
+        @if (Model.CurrentFile.FileContentType == Application.Model.FileContentType.Picture)
+        {
+            <i class="fa fa-picture-o"></i>
+        }
+        Folder Gallery
+    </a>
+</div>
+<h6>File Name : @Model.CurrentFile.Title</h6>
+@if (Model.CurrentFile.FileContentType == Application.Model.FileContentType.Video)
+{
+    <video controls playsinline id="player">
+        <!-- Video files -->
+        <source src="@Model.CurrentFile.Vpath" type="@string.Format("video/{0}",Model.CurrentFile.Format.Replace(".",""))" size="576">
+        <source src="@Model.CurrentFile.Vpath" type="@string.Format("video/{0}",Model.CurrentFile.Format.Replace(".",""))" size="720">
+        <source src="@Model.CurrentFile.Vpath" type="@string.Format("video/{0}",Model.CurrentFile.Format.Replace(".",""))" size="1080">
+        <source src="@Model.CurrentFile.Vpath" type="@string.Format("video/{0}",Model.CurrentFile.Format.Replace(".",""))" size="1440">
+
+        <!-- Caption files -->
+        @*<track kind="subtitles" label="Persian" srclang="fa" src="~/files/demo.srt" default>*@
+
+        <!-- Fallback for browsers that don't support the <video> element -->
+        <a href="@Url.Action("DownloadFile","Home",new { RootFolderId = Model.RootFolderId, FileId = Model.CurrentFile.Id })" download>Download</a>
+    </video>
+}
+@if (Model.CurrentFile.FileContentType == Application.Model.FileContentType.Audio)
+{
+    <audio id="player" controls>
+        <source src="@Model.CurrentFile.Vpath" type="@string.Format("audio/{0}",Model.CurrentFile.Format.Replace(".",""))" />
+    </audio>
+}
+@if (Model.CurrentFile.FileContentType == Application.Model.FileContentType.Picture)
+{
+    <img src="@Model.CurrentFile.Vpath" style="width:100%;height:550px;" />
+}
+<div class="row" style="margin:3rem;">
+    <h3 class="text-center" style="color:cornflowerblue;">related files in folder</h3>
+    <hr />
+    <div class="col-lg-12 col-md-12" style="display:flex;">
+        @foreach (var sim in Model.RelatedFiles.Where(p => p.Id != Model.CurrentFile.Id).ToList())
+        {
+            <div class="col-lg-3 col-md-6 col-sm-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h6 id="txtMediaName">@sim.Title</h6>
+                    </div>
+                    <div class="panel-body">
+
+                        <a href="#" onclick="ShowRelated(event,@sim.Id)" class="btn btn-primary">
+                            <i class="fa fa-play-circle"></i> @string.Format("{0}", Model.CurrentFile.FileContentType 
+                                                             == Application.Model.FileContentType.Picture ? "show" : "play")
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+@section Styles
+    {
+    <link href="@Url.Content("~/Content/assets/vendor/plyr/css/plyr.css")" rel="stylesheet" />
+}
+@section Scripts
+    {
+    <script src="@Url.Content("~/Content/assets/vendor/plyr/js/plyr.js")"></script>
+    <script src="@Url.Content("~/Content/assets/vendor/plyr/js/plyr.polyfilled.js")"></script>
+    <script>
+        const player = new Plyr('#player');
+        function ShowRelated(e,fileid)
+        {
+            e.preventDefault();
+            $.ajax(
+                {
+                    url: '@Url.Action("ViewFileJson", "Home")',
+                    type: 'post',
+                    dataType: 'json',
+                    data: { FileId: fileid, RootFolderId: '@Model.RootFolderId' },
+                    success: function (result)
+                    {
+                        if (result.isSuccessfull)
+                        {
+                            $("#page-inner").html(result.PageContent);
+                            player = new Plyr('#player');
+                        }
+                    },
+                    error: function () { }
+                });
+        }
+    </script>
+}
+

@@ -38,7 +38,8 @@ namespace FileShareApi.Controllers
                     folder.Path = $"{ConfigurationManager.AppSettings["RootVirtualFolders"]}\\{folder.Id}";
                 if (_directoryHelper.CreateFolder(folder.Path, folder.Id.ToString(), folder.IsLocal))
                 {
-                    folder.VirtualPath = $"http://{ConfigurationManager.AppSettings["ServerIp"]}/FS/{folder.Id}";
+                    //folder.VirtualPath = $"http://localhost:5394/content/files/demo";
+                    folder.VirtualPath = $"http://{ConfigurationManager.AppSettings["ServerIp"]}/fs/{folder.Id}";
                     return Ok(await _folderRepository.Add(_mapper.EntityMap<Domain.Folder>(folder)));
                 }
                 else
@@ -129,7 +130,7 @@ namespace FileShareApi.Controllers
                 var tmpFolder = _mapper.EntityMap<FolderDTO>(_folderRepository.GetFolderById(FolderId));
                 if (tmpFolder != null)
                 {
-                    var tmpDirectoryContents = _directoryHelper.GetFolderContent(tmpFolder.Path);
+                    var tmpDirectoryContents = _directoryHelper.GetFolderContent(tmpFolder.Path,tmpFolder.VirtualPath);
                     tmpDirectoryContents.Add(new Application.Model.DirectoryContent()
                      {
                          Id = 0,
@@ -138,7 +139,9 @@ namespace FileShareApi.Controllers
                          HeightLevel = 0,
                          Title = tmpFolder.Title,
                          Path = tmpFolder.Path,
-                         RootFolderId = -1
+                         RootFolderId = -1,
+                         FileContentType = Application.Model.FileContentType.Unknown,
+                         Vpath = tmpFolder.VirtualPath
                      });
                     return Ok(tmpDirectoryContents);
                 }

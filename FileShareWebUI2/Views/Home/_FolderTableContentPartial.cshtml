@@ -1,4 +1,4 @@
-﻿@model List<Application.Model.DirectoryContent>
+﻿@model FileShareWebUI2.ViewModels.FolderViewModel
 <div class="table-responsive">
     @{bool IsOdd = true; }
     <table class="table table-striped table-bordered table-hover" id="dataTables-example">
@@ -9,7 +9,7 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (var cnt in Model.OrderByDescending(p => p.ContentType))
+            @foreach (var cnt in Model.Contents.OrderByDescending(p => p.ContentType))
             {
                 if (IsOdd)
                 {
@@ -18,8 +18,8 @@
                         @if (cnt.ContentType == Application.Model.FolderContentType.File)
                         {
                             <td style="text-align:center;">
-                                <a target="_blank" href="@Url.Action("DownloadFile", "Home", new { FilePath = cnt.Path })" class="btn btn-primary">Download</a>
-                                <a href="@Url.Action("ViewFile", "Home", new { FilePath = cnt.Path })" class="btn btn-default">View</a>
+                                <a target="_blank" href="@Url.Action("DownloadFile", "Home", new { FileId = cnt.Id,RootFolderId = Model.Folder.Id })" class="btn btn-primary">Download</a>
+                                <a href="@Url.Action("ViewFile", "Home", new { FileId = cnt.Id,RootFolderId = Model.Folder.Id })" class="btn btn-default">View</a>
                             </td>
                         }
                         else
@@ -37,8 +37,8 @@
                         @if (cnt.ContentType == Application.Model.FolderContentType.File)
                         {
                             <td style="text-align:center;">
-                                <a href="@Url.Action("DownloadFile", "Home", new { FilePath = cnt.Path })" class="btn btn-primary">Download</a>
-                                <a href="@Url.Action("ViewFile", "Home", new { FilePath = cnt.Path })" class="btn btn-default">View</a>
+                                <a href="@Url.Action("DownloadFile", "Home", new { FileId = cnt.Id,RootFolderId = Model.Folder.Id })" class="btn btn-primary">Download</a>
+                                <a href="@Url.Action("ViewFile", "Home", new { FileId = cnt.Id,RootFolderId = Model.Folder.Id })" class="btn btn-default">View</a>
                             </td>
                         }
                         else

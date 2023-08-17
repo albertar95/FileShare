@@ -9,6 +9,8 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Mime;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
@@ -17,6 +19,7 @@ using System.Web.Security;
 
 namespace FileShareWebUI2.Controllers
 {
+    [Authorize]
     public class HomeController : Controller
     {
         private static string BaseApiAddress = ConfigurationManager.AppSettings["BaseApiAddress"];
@@ -201,12 +204,15 @@ namespace FileShareWebUI2.Controllers
 
         //folder page cache view
 
-        public async Task<ActionResult> Folder(Guid Id)
+        public async Task<ActionResult> Folder(Guid Id,long FolderId = 0)
         {
             FolderViewModel fvm = new FolderViewModel();
             fvm.Folder = await CacheHelper.GetCachedFolder(Id);
-            fvm.Contents = await CacheHelper.GetCachedAllDirectoryContent(fvm.Folder.Id);
-            fvm.Directory = await CacheHelper.GetCachedDirectoryById(Id, 0);
+            fvm.Directory = await CacheHelper.GetCachedContentById(Id, FolderId);
+            if (FolderId == 0)
+                fvm.Contents = await CacheHelper.GetCachedAllDirectoryContent(fvm.Folder.Id);
+            else
+                fvm.Contents = await CacheHelper.GetCachedDirectoryContentById(Id, FolderId);
             return View(fvm);
         }
         public async Task<ActionResult> SubFolder(Guid RootFolderId, long FolderId)
@@ -214,7 +220,7 @@ namespace FileShareWebUI2.Controllers
             FolderViewModel fvm = new FolderViewModel();
             fvm.Folder = await CacheHelper.GetCachedFolder(RootFolderId);
             fvm.Contents = await CacheHelper.GetCachedDirectoryContentById(RootFolderId, FolderId);
-            fvm.Directory = await CacheHelper.GetCachedDirectoryById(RootFolderId, FolderId);
+            fvm.Directory = await CacheHelper.GetCachedContentById(RootFolderId, FolderId);
             return Json(new { isSuccessfull = true, PageContent = ViewHelper.RenderViewToString(this, "_FolderPartial", fvm) });
         }
 
@@ -319,50 +325,92 @@ namespace FileShareWebUI2.Controllers
 
         //download file in folder
 
-        public ActionResult DownloadFile(string FilePath)
+        public async Task<bool> DownloadFile(long FileId, Guid RootFolderId)
         {
-            byte[] fileBytes = System.IO.File.ReadAllBytes(FilePath);
-            string fileName = Path.GetFileName(FilePath);
-            return File(fileBytes, System.Net.Mime.MediaTypeNames.Application.Octet, fileName);
+            Stream stream = null;
+            var file = await CacheHelper.GetCachedContentById(RootFolderId,FileId);
+            int bytesToRead = 50000;
+            byte[] buffer = new Byte[bytesToRead];
+            try
+            {
+                HttpWebRequest fileReq = (HttpWebRequest)HttpWebRequest.Create(file.Vpath);
+                HttpWebResponse fileResp = (HttpWebResponse)fileReq.GetResponse();
+                if (fileReq.ContentLength > 0)
+                    fileResp.ContentLength = fileReq.ContentLength;
+                stream = fileResp.GetResponseStream();
+                var resp = Response;
+                resp.ContentType = MediaTypeNames.Application.Octet;
+                resp.AddHeader("Content-Disposition", "attachment; filename=\"" + file.Title + "\"");
+                resp.AddHeader("Content-Length", fileResp.ContentLength.ToString());
+                int length;
+                do
+                {
+                    if (resp.IsClientConnected)
+                    {
+                        length = stream.Read(buffer, 0, bytesToRead);
+                        resp.OutputStream.Write(buffer, 0, length);
+                        resp.Flush();
+                        buffer = new Byte[bytesToRead];
+                    }
+                    else
+                    {
+                        length = -1;
+                    }
+                } while (length > 0); //Repeat until no data is read
+            }
+            finally
+            {
+                if (stream != null)
+                {
+                    stream.Close();
+                }
+            }
+            return true;
         }
-
         //view file in folder
 
-        public ActionResult ViewFile(string FilePath, Guid FolderId)
+        public async Task<ActionResult> ViewFile(long FileId, Guid RootFolderId)
         {
-            //switch (DirectoryHelper.GetFileType(FilePath))
-            //{
-            //    case FileContentType.Picture:
-            //        return View("DocViewer", "", new List<string>() { "files\\\\demo.jpg"
-            //            , Url.Action("SubFolder", "Home", new { FolderId = FolderId, FolderPath = Directory.GetParent(FilePath).FullName }).ToString() });
-            //    case FileContentType.Video:
-            //        return View("MovieViewer", "", new List<string>() { "files\\\\demo.mp4"
-            //            , Url.Action("SubFolder", "Home", new { FolderId = FolderId, FolderPath = Directory.GetParent(FilePath).FullName }).ToString() });
-            //    case FileContentType.Pdf:
-            //        return View("DocViewer", "", new List<string>() { "files\\\\demo.pdf"
-            //            , Url.Action("SubFolder", "Home", new { FolderId = FolderId, FolderPath = Directory.GetParent(FilePath).FullName }).ToString() });
-            //    case FileContentType.Doc:
-            //        return View("DocViewer", "", new List<string>() { "files\\\\demo.docx"
-            //            , Url.Action("SubFolder", "Home", new { FolderId = FolderId, FolderPath = Directory.GetParent(FilePath).FullName }).ToString() });
-            //    case FileContentType.Audio:
-            //        return View("AudioViewer", "", new List<string>() { "files\\\\demo.mp3"
-            //            , Url.Action("SubFolder", "Home", new { FolderId = FolderId, FolderPath = Directory.GetParent(FilePath).FullName }).ToString() });
-            //    case FileContentType.SpreadSheet:
-            //        return View("DocViewer", "", new List<string>() { "files\\\\demo.xlsx"
-            //            , Url.Action("SubFolder", "Home", new { FolderId = FolderId, FolderPath = Directory.GetParent(FilePath).FullName }).ToString() });
-            //    case FileContentType.Presentation:
-            //        return View("DocViewer", "", new List<string>() { "files\\\\demo.pptx"
-            //            , Url.Action("SubFolder", "Home", new { FolderId = FolderId, FolderPath = Directory.GetParent(FilePath).FullName }).ToString() });
-            //    case FileContentType.Compress:
-            //        byte[] fileBytes = System.IO.File.ReadAllBytes(FilePath);
-            //        string fileName = Path.GetFileName(FilePath);
-            //        return File(fileBytes, System.Net.Mime.MediaTypeNames.Application.Octet, fileName);
-            //    case FileContentType.Unknown:
-            //        return RedirectToAction("ErrorHandling");
-            //    default:
-            //        return RedirectToAction("ErrorHandling");
-            //}
-            return View();
+            FileViewModel fvm = new FileViewModel();
+            fvm.CurrentFile = await CacheHelper.GetCachedContentById(RootFolderId, FileId);
+            fvm.RootFolderId = RootFolderId;
+            if (fvm.CurrentFile.FileContentType == FileContentType.Doc || fvm.CurrentFile.FileContentType == FileContentType.Presentation ||
+                fvm.CurrentFile.FileContentType == FileContentType.Pdf || fvm.CurrentFile.FileContentType == FileContentType.SpreadSheet)
+                    return View("DocViewer",fvm);
+            if (fvm.CurrentFile.FileContentType == FileContentType.Audio || fvm.CurrentFile.FileContentType == FileContentType.Video ||
+                fvm.CurrentFile.FileContentType == FileContentType.Picture)
+            {
+                fvm.RelatedFiles = await CacheHelper.GetCachedRelatedContentById(RootFolderId, fvm.CurrentFile.RootFolderId, FileId, fvm.CurrentFile.FileContentType);
+                return View("MultimediaViewer", fvm);
+            }
+            else
+                return RedirectToAction("DownloadFile",new { FileId = FileId , RootFolderId = RootFolderId });
+        }
+        public async Task<ActionResult> ViewFileJson(long FileId, Guid RootFolderId)
+        {
+            FileViewModel fvm = new FileViewModel();
+            fvm.CurrentFile = await CacheHelper.GetCachedContentById(RootFolderId, FileId);
+            fvm.RootFolderId = RootFolderId;
+            fvm.RelatedFiles = await CacheHelper.GetCachedRelatedContentById(RootFolderId, fvm.CurrentFile.RootFolderId,FileId, fvm.CurrentFile.FileContentType);
+            return Json(new { isSuccessfull = true, PageContent = ViewHelper.RenderViewToString(this, "_MultimediaViewerPartial", fvm) });
+        }
+        public async Task<ActionResult> MediaGallery(long FolderId, Guid RootFolderId,FileContentType FileType)
+        {
+            FileViewModel fvm = new FileViewModel();
+            fvm.RootFolderId = RootFolderId;
+            fvm.FolderId = FolderId;
+            fvm.RelatedFiles = await CacheHelper.GetCachedRelatedContentForGallery(RootFolderId, FolderId,FileType,0,
+                FileType == FileContentType.Video ? 9 : FileType == FileContentType.Audio ? 30 : 60);
+            return View(fvm);
+        }
+        public async Task<ActionResult> MediaGalleryPagination(long FolderId, Guid RootFolderId, FileContentType FileType,int currentPage)
+        {
+            FileViewModel fvm = new FileViewModel();
+            fvm.RootFolderId = RootFolderId;
+            fvm.FolderId = FolderId;
+            fvm.RelatedFiles = await CacheHelper.GetCachedRelatedContentForGallery(RootFolderId, FolderId, FileType
+                , currentPage,FileType == FileContentType.Video ? 9 : FileType == FileContentType.Audio ? 30 : 60);
+            return Json(new { isSuccessfull = true, PageContent = ViewHelper.RenderViewToString(this, "_MediaGalleryPartial",fvm),noMore = fvm.RelatedFiles.Count == 0 ? true : false });
         }
 
         //general section
