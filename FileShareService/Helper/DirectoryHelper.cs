@@ -1,4 +1,5 @@
 ﻿using Application.Model;
+using Microsoft.Web.Administration;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,7 +10,7 @@ namespace Application.Helpers
     public class DirectoryHelper : IDirectoryHelper
     {
         private static List<string> PictureExts = new List<string>() { ".jpg", ".png", ".gif" };
-        private static List<string> VideoExts = new List<string>() { ".mp4", ".mov", ".flv", ".ts" };
+        private static List<string> VideoExts = new List<string>() { ".mp4", ".mov", ".flv", ".ts",".mkv" };
         private static List<string> PdfExts = new List<string>() { ".pdf" };
         private static List<string> DocExts = new List<string>() { ".doc", ".docx" };
         private static List<string> SpreadSheetExts = new List<string>() { ".xls", ".xlsx" };
@@ -90,23 +91,23 @@ namespace Application.Helpers
         }
         private void CreateVirtualDirectory(string path,string id)
         {
-            //ServerManager iisManager = new ServerManager(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "inetsrv\\config\\applicationHost.config"));
-            //Microsoft.Web.Administration.Application mySite = iisManager.Sites["Default Web Site"].Applications[0];
-            //if (mySite.VirtualDirectories[$"/FS/{Id}"] == null)
-            //{
-            //    mySite.VirtualDirectories.Add($"/FS/{Id}", path);
-            //    iisManager.CommitChanges();
-            //}
+            ServerManager iisManager = new ServerManager(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "inetsrv\\config\\applicationHost.config"));
+            Microsoft.Web.Administration.Application mySite = iisManager.Sites["Default Web Site"].Applications[0];
+            if (mySite.VirtualDirectories[$"/FS/{id}"] == null)
+            {
+                mySite.VirtualDirectories.Add($"/FS/{id}", path);
+                iisManager.CommitChanges();
+            }
         }
         private void DeleteVirtualDirectory(string folderId)
         {
-            //ServerManager iisManager = new ServerManager(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "inetsrv\\config\\applicationHost.config"));
-            //VirtualDirectory vd = iisManager.Sites["Default Web Site"].Applications[0].VirtualDirectories[$"/FS/{Id}"];
-            //if (vd != null)
-            //{
-            //    iisManager.Sites["Default Web Site"].Applications[0].VirtualDirectories.Remove(vd);
-            //    iisManager.CommitChanges();
-            //}
+            ServerManager iisManager = new ServerManager(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "inetsrv\\config\\applicationHost.config"));
+            VirtualDirectory vd = iisManager.Sites["Default Web Site"].Applications[0].VirtualDirectories[$"/FS/{folderId}"];
+            if (vd != null)
+            {
+                iisManager.Sites["Default Web Site"].Applications[0].VirtualDirectories.Remove(vd);
+                iisManager.CommitChanges();
+            }
         }
         private List<DirectoryContent> GetChildElements(string path,string vpath,int height,long rootId,long startIndex)
         {

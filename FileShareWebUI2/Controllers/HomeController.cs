@@ -329,7 +329,7 @@ namespace FileShareWebUI2.Controllers
         {
             Stream stream = null;
             var file = await CacheHelper.GetCachedContentById(RootFolderId,FileId);
-            int bytesToRead = 50000;
+            int bytesToRead = 200000;
             byte[] buffer = new Byte[bytesToRead];
             try
             {
@@ -436,7 +436,6 @@ namespace FileShareWebUI2.Controllers
                 userDataCookie.Values.Add("UserId", Content.User.Id.ToString());
                 userDataCookie.Values.Add("UserLevel", Content.User.IsAdmin ? "Admin" : "Simple");
                 userDataCookie.Values.Add("Fullname", Content.User.Fullname);
-                userDataCookie.Secure = true;
                 userDataCookie.HttpOnly = true;
                 userDataCookie.Expires = DateTime.Now.AddHours(8);
                 Response.Cookies.Add(userDataCookie);

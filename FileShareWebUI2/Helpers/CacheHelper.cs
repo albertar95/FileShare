@@ -287,6 +287,7 @@ namespace FileShareWebUI2.Helpers
         {
             DirectoryRepository.Clear();
             Folders.Clear();
+            cacheHelper = null;
             GC.Collect();
         }
 
