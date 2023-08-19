@@ -6,9 +6,9 @@
 
 <div class="row" style="margin:10px 10px 25px 10px;">
     <a href="@Url.Action("Folder","Home",new { Id = Model.RootFolderId, FolderId = Model.FolderId })" class="btn btn-default"><i class="fa fa-arrow-circle-o-left"></i> Return</a>
-    @if (Model.RelatedFiles.FirstOrDefault().FileContentType == Application.Model.FileContentType.Audio)
+    @if (Model.GalleryContext == Application.Model.FileContentType.Audio)
     {
-        <button class="btn btn-success" onclick="PlayAllAudio()"><i class="fa fa-play-circle-o"></i> Play All</button>
+    <button class="btn btn-success" onclick="PlayAllAudio()"><i class="fa fa-play-circle-o"></i> Play All</button>
     }
 </div>
 @for (int i = 0; i <= Model.RelatedFiles.Count / 3; i++)
@@ -21,19 +21,19 @@
                     <div class="panel-heading">
                         <a href="@Url.Action("ViewFile","Home",new { FileId = cfile.Id, RootFolderId = Model.RootFolderId })">@cfile.Title</a>
                     </div>
+                    @if (cfile.FileContentType == Application.Model.FileContentType.Picture)
+                    {
+                        <div class="panel-body gImage" id="@cfile.SecondaryIndex" title="@cfile.Vpath" onclick="ViewImage('@cfile.SecondaryIndex')" style="background-image:url('@cfile.Vpath');background-size:contain;background-repeat:no-repeat;height:10em;background-position:center;"></div>
+                    }
                     <div class="panel-body">
-                        @if (cfile.FileContentType == Application.Model.FileContentType.Picture)
-                        {
-                            <img src="@cfile.Vpath" id="@cfile.SecondaryIndex" class="gImage" style="width:100%;height:175px;" onclick="ViewImage(@cfile.SecondaryIndex)" />
-                        }
                         @if (cfile.FileContentType == Application.Model.FileContentType.Video)
                         {
-                            <video controls playsinline class="player" id="@cfile.Id">
+                            <video controls playsinline class="player" id="@cfile.Id" style="max-width:100%;max-height:100%;">
                                 <!-- Video files -->
-                                <source src="@cfile.Vpath" type="@string.Format("video/{0}",cfile.Format.Replace(".",""))" size="576">
-                                <source src="@cfile.Vpath" type="@string.Format("video/{0}",cfile.Format.Replace(".",""))" size="720">
-                                <source src="@cfile.Vpath" type="@string.Format("video/{0}",cfile.Format.Replace(".",""))" size="1080">
-                                <source src="@cfile.Vpath" type="@string.Format("video/{0}",cfile.Format.Replace(".",""))" size="1440">
+                                <source src="@cfile.Vpath" type="@cfile.MimeType" size="576">
+                                <source src="@cfile.Vpath" type="@cfile.MimeType" size="720">
+                                <source src="@cfile.Vpath" type="@cfile.MimeType" size="1080">
+                                <source src="@cfile.Vpath" type="@cfile.MimeType" size="1440">
 
                                 <!-- Caption files -->
                                 @*<track kind="subtitles" label="Persian" srclang="fa" src="~/files/demo.srt" default>*@
@@ -44,8 +44,8 @@
                         }
                         @if (cfile.FileContentType == Application.Model.FileContentType.Audio)
                         {
-                            <audio class="player" id="@cfile.Id" controls>
-                                <source src="@cfile.Vpath" type="@string.Format("audio/{0}",cfile.Format.Replace(".",""))" />
+                            <audio class="player" id="@cfile.Id" style="max-width:100%;max-height:100%;" controls>
+                                <source src="@cfile.Vpath" type="@cfile.MimeType" />
                             </audio>
                         }
                     </div>
@@ -56,7 +56,14 @@
 }
 <div id="NewItems"></div>
 <div class="row" style="margin:0 auto;text-align:center;">
-    <button onclick="MoreFiles()" id="btnMore" class="btn btn-default">more</button>
+    @if (Model.RelatedFiles.Any())
+    {
+        <button onclick="MoreFiles()" id="btnMore" class="btn btn-default">more</button>
+    }
+    else
+    {
+        <button onclick="MoreFiles()" id="btnMore" class="btn btn-default" style="display:none;">more</button>
+    }
     <input id="txtPageNo" value="1" hidden />
 </div>
 <div class="modal fade" id="MediaModal" style="height:96vh;padding-left:2%;padding-right:2%;" tabindex="-1" role="dialog" aria-labelledby="MediaModalLabel" aria-hidden="true">
@@ -70,7 +77,7 @@
             </div>
             <div class="modal-footer text-center">
                 <button class="btn btn-default" id="btnModalPrev"><i class="fa fa-arrow-circle-left"></i></button>
-                <button class="btn btn-success" id="btnModalPlay"><i class="fa fa-play-circle-o"></i></button>
+                <button class="btn btn-success" id="btnModalPlay"><i class="fa fa-play"></i></button>
                 <button class="btn btn-default" id="btnModalNext"><i class="fa fa-arrow-circle-right"></i></button>
             </div>
         </div>
@@ -120,7 +127,7 @@
                 e.preventDefault();
                 if (isPlayOn) {
                     clearInterval(imageplayInterval);
-                    $("#btnModalPlay").html('<i class="fa fa-play-circle-o"></i>');
+                    $("#btnModalPlay").html('<i class="fa fa-play"></i>');
                     isPlayOn = false;
                 } else {
                     imageplayInterval = window.setInterval(StartImagePlay, 5000);
@@ -133,12 +140,20 @@
         function StartImagePlay()
         {
             var maxIndex1 = parseFloat($(".gImage").length) - parseFloat(1);
-            if (parseFloat($("#modalImg").attr('alt')) >= maxIndex1) {
+            if ($("#MediaModal").hasClass('in')) {
+                if (parseFloat($("#modalImg").attr('alt')) >= maxIndex1) {
+                    clearInterval(imageplayInterval);
+                    $("#btnModalPlay").html('<i class="fa fa-play"></i>');
+                    isPlayOn = false;
+                    ViewImage(parseFloat($("#modalImg").attr('alt')) + parseFloat(1));
+                } else {
+                    ViewImage(parseFloat($("#modalImg").attr('alt')) + parseFloat(1));
+                }
+            } else
+            {
                 clearInterval(imageplayInterval);
-                $("#btnModalPlay").html('<i class="fa fa-play-circle-o"></i>');
-                ViewImage(parseFloat($("#modalImg").attr('alt')) + parseFloat(1));
-            } else {
-                ViewImage(parseFloat($("#modalImg").attr('alt')) + parseFloat(1));
+                $("#btnModalPlay").html('<i class="fa fa-play"></i>');
+                isPlayOn = false;
             }
         }
         function MoreFiles()
@@ -148,7 +163,7 @@
                     url: '@Url.Action("MediaGalleryPagination", "Home")',
                     type: 'post',
                     dataType: 'json',
-                    data: { FolderId: '@Model.FolderId', RootFolderId: '@Model.RootFolderId', FileType: '@Model.RelatedFiles.FirstOrDefault().FileContentType', currentPage: $("#txtPageNo").val() },
+                    data: { FolderId: '@Model.FolderId', RootFolderId: '@Model.RootFolderId', FileType: '@Model.GalleryContext', currentPage: $("#txtPageNo").val() },
                     success: function (result)
                     {
                         if (result.isSuccessfull)
@@ -170,7 +185,7 @@
         }
         function ViewImage(fileIndex)
         {
-            var image = document.getElementById(fileIndex).src;
+            var image = document.getElementById(fileIndex).title;
             var maxIndex = $(".gImage").length;
             var next = parseFloat(fileIndex) + parseFloat(1);
             var pre = parseFloat(fileIndex) - parseFloat(1);
@@ -183,7 +198,7 @@
                 $("#btnModalPrev").css('display', '');
                 $("#btnModalPrev").attr('onclick', 'ViewImage(' + pre + ')');
                 clearInterval(imageplayInterval);
-                $("#btnModalPlay").html('<i class="fa fa-play-circle-o"></i>');
+                $("#btnModalPlay").html('<i class="fa fa-play"></i>');
             } else
             {
                 $("#btnModalNext").attr('onclick', 'ViewImage(' + next + ')');

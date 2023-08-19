@@ -31,197 +31,316 @@ namespace FileShareWebUI2.Controllers
 
         public async Task<ActionResult> Users()
         {
-            var Content = new List<UserDTO>();
-            if (CacheHelper.GetCachedUserData().IsAdmin)
+            try
             {
-                var result = await ApiHelper.Call(ApiHelper.HttpMethods.Get, $"{BaseApiAddress}/User/Get");
-                if (!result.IsSuccessfulResult())
-                    return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
-                Content = ApiHelper.Deserialize<List<UserDTO>>(result.Content);
+                var Content = new List<UserDTO>();
+                if (CacheHelper.GetCachedUserData().IsAdmin)
+                {
+                    var result = await ApiHelper.Call(ApiHelper.HttpMethods.Get, $"{BaseApiAddress}/User/Get");
+                    if (!result.IsSuccessfulResult())
+                        return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
+                    Content = ApiHelper.Deserialize<List<UserDTO>>(result.Content);
+                }
+                return View(Content);
             }
-            return View(Content);
+            catch (Exception)
+            {
+                return RedirectToAction("ErrorHandling", new { Code = 500 });
+            }
         }
         public ActionResult AddUser()
         {
-            return View();
+            try
+            {
+                return View();
+            }
+            catch (Exception)
+            {
+                return RedirectToAction("ErrorHandling", new { Code = 500 });
+            }
         }
         public async Task<ActionResult> EditUser(Guid UserId)
         {
-            var result = await ApiHelper.Call(ApiHelper.HttpMethods.Get, $"{BaseApiAddress}/User/GetUserById/{UserId}");
-            if (!result.IsSuccessfulResult())
-                return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
-            var Content = ApiHelper.Deserialize<UpdateUserDTO>(result.Content);
-            Content.Password = Encoding.UTF8.GetString(Convert.FromBase64String(Content.Password));
-            return View(Content);
+            try
+            {
+                var result = await ApiHelper.Call(ApiHelper.HttpMethods.Get, $"{BaseApiAddress}/User/GetUserById/{UserId}");
+                if (!result.IsSuccessfulResult())
+                    return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
+                var Content = ApiHelper.Deserialize<UpdateUserDTO>(result.Content);
+                Content.Password = Encoding.UTF8.GetString(Convert.FromBase64String(Content.Password));
+                return View(Content);
+            }
+            catch (Exception)
+            {
+                return RedirectToAction("ErrorHandling", new { Code = 500 });
+            }
         }
         public async Task<ActionResult> UserDetail(Guid UserId)
         {
-            var result = await ApiHelper.Call(ApiHelper.HttpMethods.Get, $"{BaseApiAddress}/User/GetUserById/{UserId}");
-            if (!result.IsSuccessfulResult())
-                return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
-            var Content = ApiHelper.Deserialize<UserDTO>(result.Content);
-            return View(Content);
+            try
+            {
+                var result = await ApiHelper.Call(ApiHelper.HttpMethods.Get, $"{BaseApiAddress}/User/GetUserById/{UserId}");
+                if (!result.IsSuccessfulResult())
+                    return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
+                var Content = ApiHelper.Deserialize<UserDTO>(result.Content);
+                return View(Content);
+            }
+            catch (Exception)
+            {
+                return RedirectToAction("ErrorHandling", new { Code = 500 });
+            }
         }
         [HttpPost]
         public async Task<ActionResult> SubmitAddUser(CreateUserDTO user)
         {
-            if (CacheHelper.GetCachedUserData().IsAdmin)
+            try
             {
-                //user.Password = Encryption.EncryptStringView(user.Password.Trim());
-                var body = ApiHelper.Serialize(user);
-                var result = await ApiHelper.Call(ApiHelper.HttpMethods.Post, $"{BaseApiAddress}/User/Post", body);
-                if (!result.IsSuccessfulResult())
-                    return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
-                if (ApiHelper.Deserialize<bool>(result.Content))
-                    TempData["UserSuccess"] = "user created successfully.";
+                if (CacheHelper.GetCachedUserData().IsAdmin)
+                {
+                    //user.Password = Encryption.EncryptStringView(user.Password.Trim());
+                    var body = ApiHelper.Serialize(user);
+                    var result = await ApiHelper.Call(ApiHelper.HttpMethods.Post, $"{BaseApiAddress}/User/Post", body);
+                    if (!result.IsSuccessfulResult())
+                        return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
+                    if (ApiHelper.Deserialize<bool>(result.Content))
+                        TempData["UserSuccess"] = "user created successfully.";
+                    else
+                        TempData["UserError"] = "error occured in creating user.try again later.";
+                    return RedirectToAction("Users");
+                }
                 else
-                    TempData["UserError"] = "error occured in creating user.try again later.";
-                return RedirectToAction("Users");
+                    return RedirectToAction("Login");
             }
-            else
-                return RedirectToAction("Login");
+            catch (Exception)
+            {
+                return RedirectToAction("ErrorHandling", new { Code = 500 });
+            }
         }
         [HttpPost]
         public async Task<ActionResult> SubmitEditUser(UpdateUserDTO user)
         {
-            if (CacheHelper.GetCachedUserData().IsAdmin)
+            try
             {
-                //user.Password = Encryption.EncryptStringView(user.Password.Trim());
-                var body = ApiHelper.Serialize(user);
-                var result = await ApiHelper.Call(ApiHelper.HttpMethods.Post, $"{BaseApiAddress}/User/Patch", body);
-                if (!result.IsSuccessfulResult())
-                    return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
-                if (ApiHelper.Deserialize<bool>(result.Content))
-                    TempData["UserSuccess"] = "user edited successfully.";
-                else
-                    TempData["UserError"] = "error occured in editing user.try again later.";
-                return RedirectToAction("Users");
-            }
-            else
-                return RedirectToAction("Login");
-        }
-        public async Task<ActionResult> SubmitDeleteUser(Guid UserId)
-        {
-            if (CacheHelper.GetCachedUserData().IsAdmin)
-            {
-                if (CacheHelper.userData.UserId != UserId)
+                if (CacheHelper.GetCachedUserData().IsAdmin)
                 {
-                    var result = await ApiHelper.Call(ApiHelper.HttpMethods.Delete, $"{BaseApiAddress}/User/Delete/{UserId}");
+                    //user.Password = Encryption.EncryptStringView(user.Password.Trim());
+                    var body = ApiHelper.Serialize(user);
+                    var result = await ApiHelper.Call(ApiHelper.HttpMethods.Post, $"{BaseApiAddress}/User/Patch", body);
                     if (!result.IsSuccessfulResult())
                         return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
                     if (ApiHelper.Deserialize<bool>(result.Content))
-                        TempData["UserSuccess"] = "user deleted successfully.";
+                        TempData["UserSuccess"] = "user edited successfully.";
                     else
-                        TempData["UserError"] = "error occured in deleting user.try again later.";
+                        TempData["UserError"] = "error occured in editing user.try again later.";
+                    return RedirectToAction("Users");
                 }
                 else
-                    TempData["UserError"] = "user can not delete itself";
+                    return RedirectToAction("Login");
             }
-            else
-                TempData["UserError"] = "current user dont have access to complete this action.";
-            return RedirectToAction("Users");
+            catch (Exception)
+            {
+                return RedirectToAction("ErrorHandling", new { Code = 500 });
+            }
+        }
+        public async Task<ActionResult> SubmitDeleteUser(Guid UserId)
+        {
+            try
+            {
+                if (CacheHelper.GetCachedUserData().IsAdmin)
+                {
+                    if (CacheHelper.userData.UserId != UserId)
+                    {
+                        var result = await ApiHelper.Call(ApiHelper.HttpMethods.Delete, $"{BaseApiAddress}/User/Delete/{UserId}");
+                        if (!result.IsSuccessfulResult())
+                            return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
+                        if (ApiHelper.Deserialize<bool>(result.Content))
+                            TempData["UserSuccess"] = "user deleted successfully.";
+                        else
+                            TempData["UserError"] = "error occured in deleting user.try again later.";
+                    }
+                    else
+                        TempData["UserError"] = "user can not delete itself";
+                }
+                else
+                    TempData["UserError"] = "current user dont have access to complete this action.";
+                return RedirectToAction("Users");
+            }
+            catch (Exception)
+            {
+                return RedirectToAction("ErrorHandling", new { Code = 500 });
+            }
         }
         public async Task<ActionResult> UserProfile()
         {
-            var result = await ApiHelper.Call(ApiHelper.HttpMethods.Get, $"{BaseApiAddress}/User/GetUserById/{CacheHelper.GetCachedUserData().UserId}");
-            if (!result.IsSuccessfulResult())
-                return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
-            var Content = ApiHelper.Deserialize<UserDTO>(result.Content);
-            return View(Content);
+            try
+            {
+                var result = await ApiHelper.Call(ApiHelper.HttpMethods.Get, $"{BaseApiAddress}/User/GetUserById/{CacheHelper.GetCachedUserData().UserId}");
+                if (!result.IsSuccessfulResult())
+                    return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
+                var Content = ApiHelper.Deserialize<UserDTO>(result.Content);
+                return View(Content);
+            }
+            catch (Exception)
+            {
+                return RedirectToAction("ErrorHandling", new { Code = 500 });
+            }
         }
 
         //folder crud section
 
         public async Task<ActionResult> Folders()
         {
-            var result = await ApiHelper.Call(ApiHelper.HttpMethods.Get, $"{BaseApiAddress}/Folder/GetFoldersByUserId/{CacheHelper.GetCachedUserData().UserId}");
-            if (!result.IsSuccessfulResult())
-                return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
-            var Content = ApiHelper.Deserialize<List<FolderDTO>>(result.Content);
-            return View(Content);
+            try
+            {
+                var result = await ApiHelper.Call(ApiHelper.HttpMethods.Get, $"{BaseApiAddress}/Folder/GetFoldersByUserId/{CacheHelper.GetCachedUserData().UserId}");
+                if (!result.IsSuccessfulResult())
+                    return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
+                var Content = ApiHelper.Deserialize<List<FolderDTO>>(result.Content);
+                return View(Content);
+            }
+            catch (Exception)
+            {
+                return RedirectToAction("ErrorHandling", new { Code = 500 });
+            }
         }
         public ActionResult AddFolder()
         {
-            return View();
+            try
+            {
+                return View();
+            }
+            catch (Exception)
+            {
+                return RedirectToAction("ErrorHandling", new { Code = 500 });
+            }
         }
         public async Task<ActionResult> EditFolder(Guid FolderId)
         {
-            var result = await ApiHelper.Call(ApiHelper.HttpMethods.Get, $"{BaseApiAddress}/Folder/GetFolderById/{FolderId}");
-            if (!result.IsSuccessfulResult())
-                return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
-            var Content = ApiHelper.Deserialize<UpdateFolderDTO>(result.Content);
-            return View(Content);
+            try
+            {
+                var result = await ApiHelper.Call(ApiHelper.HttpMethods.Get, $"{BaseApiAddress}/Folder/GetFolderById/{FolderId}");
+                if (!result.IsSuccessfulResult())
+                    return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
+                var Content = ApiHelper.Deserialize<UpdateFolderDTO>(result.Content);
+                return View(Content);
+            }
+            catch (Exception)
+            {
+                return RedirectToAction("ErrorHandling", new { Code = 500 });
+            }
         }
         public async Task<ActionResult> FolderDetail(Guid FolderId)
         {
-            var result = await ApiHelper.Call(ApiHelper.HttpMethods.Get, $"{BaseApiAddress}/Folder/GetFolderById/{FolderId}");
-            if (!result.IsSuccessfulResult())
-                return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
-            var Content = ApiHelper.Deserialize<FolderDTO>(result.Content);
-            return View(Content);
+            try
+            {
+                var result = await ApiHelper.Call(ApiHelper.HttpMethods.Get, $"{BaseApiAddress}/Folder/GetFolderById/{FolderId}");
+                if (!result.IsSuccessfulResult())
+                    return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
+                var Content = ApiHelper.Deserialize<FolderDTO>(result.Content);
+                return View(Content);
+            }
+            catch (Exception)
+            {
+                return RedirectToAction("ErrorHandling", new { Code = 500 });
+            }
         }
         [HttpPost]
         public async Task<ActionResult> SubmitAddFolder(CreateFolderDTO folder)
         {
-            folder.UserId = CacheHelper.GetCachedUserData().UserId;
-            var body = ApiHelper.Serialize(folder);
-            var result = await ApiHelper.Call(ApiHelper.HttpMethods.Post, $"{BaseApiAddress}/Folder/Post", body);
-            if (!result.IsSuccessfulResult())
-                return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
-            if (ApiHelper.Deserialize<bool>(result.Content))
-                TempData["FolderSuccess"] = "folder created successfully.";
-            else
-                TempData["FolderError"] = "error occured in creating folder.try again later.";
-            IsFoldersChanged = true;
-            return RedirectToAction("Folders");
+            try
+            {
+                folder.UserId = CacheHelper.GetCachedUserData().UserId;
+                var body = ApiHelper.Serialize(folder);
+                var result = await ApiHelper.Call(ApiHelper.HttpMethods.Post, $"{BaseApiAddress}/Folder/Post", body);
+                if (!result.IsSuccessfulResult())
+                    return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
+                if (ApiHelper.Deserialize<bool>(result.Content))
+                    TempData["FolderSuccess"] = "folder created successfully.";
+                else
+                    TempData["FolderError"] = "error occured in creating folder.try again later.";
+                IsFoldersChanged = true;
+                return RedirectToAction("Folders");
+            }
+            catch (Exception)
+            {
+                return RedirectToAction("ErrorHandling", new { Code = 500 });
+            }
         }
         [HttpPost]
         public async Task<ActionResult> SubmitEditFolder(UpdateFolderDTO folder)
         {
-            var body = ApiHelper.Serialize(folder);
-            var result = await ApiHelper.Call(ApiHelper.HttpMethods.Post, $"{BaseApiAddress}/Folder/Patch", body);
-            if (!result.IsSuccessfulResult())
-                return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
-            if (ApiHelper.Deserialize<bool>(result.Content))
-                TempData["FolderSuccess"] = "folder edited successfully.";
-            else
-                TempData["FolderError"] = "error occured in editing folder.try again later.";
-            IsFoldersChanged = true;
-            return RedirectToAction("Folders");
+            try
+            {
+                var body = ApiHelper.Serialize(folder);
+                var result = await ApiHelper.Call(ApiHelper.HttpMethods.Post, $"{BaseApiAddress}/Folder/Patch", body);
+                if (!result.IsSuccessfulResult())
+                    return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
+                if (ApiHelper.Deserialize<bool>(result.Content))
+                    TempData["FolderSuccess"] = "folder edited successfully.";
+                else
+                    TempData["FolderError"] = "error occured in editing folder.try again later.";
+                IsFoldersChanged = true;
+                return RedirectToAction("Folders");
+            }
+            catch (Exception)
+            {
+                return RedirectToAction("ErrorHandling", new { Code = 500 });
+            }
         }
         public async Task<ActionResult> SubmitDeleteFolder(Guid FolderId)
         {
-            var result = await ApiHelper.Call(ApiHelper.HttpMethods.Delete, $"{BaseApiAddress}/Folder/Delete/{FolderId}");
-            if (!result.IsSuccessfulResult())
-                return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
-            if (ApiHelper.Deserialize<bool>(result.Content))
-                TempData["FolderSuccess"] = "folder deleted successfully.";
-            else
-                TempData["FolderError"] = "error occured in deleting folder.try again later.";
-            IsFoldersChanged = true;
-            return RedirectToAction("Folders");
+            try
+            {
+                var result = await ApiHelper.Call(ApiHelper.HttpMethods.Delete, $"{BaseApiAddress}/Folder/Delete/{FolderId}");
+                if (!result.IsSuccessfulResult())
+                    return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
+                if (ApiHelper.Deserialize<bool>(result.Content))
+                    TempData["FolderSuccess"] = "folder deleted successfully.";
+                else
+                    TempData["FolderError"] = "error occured in deleting folder.try again later.";
+                IsFoldersChanged = true;
+                return RedirectToAction("Folders");
+            }
+            catch (Exception)
+            {
+                return RedirectToAction("ErrorHandling", new { Code = 500 });
+            }
         }
 
         //folder page cache view
 
         public async Task<ActionResult> Folder(Guid Id,long FolderId = 0)
         {
-            FolderViewModel fvm = new FolderViewModel();
-            fvm.Folder = await CacheHelper.GetCachedFolder(Id);
-            fvm.Directory = await CacheHelper.GetCachedContentById(Id, FolderId);
-            if (FolderId == 0)
-                fvm.Contents = await CacheHelper.GetCachedAllDirectoryContent(fvm.Folder.Id);
-            else
-                fvm.Contents = await CacheHelper.GetCachedDirectoryContentById(Id, FolderId);
-            return View(fvm);
+            try
+            {
+                FolderViewModel fvm = new FolderViewModel();
+                fvm.Folder = await CacheHelper.GetCachedFolder(Id);
+                fvm.Directory = await CacheHelper.GetCachedContentById(Id, FolderId);
+                if (FolderId == 0)
+                    fvm.Contents = await CacheHelper.GetCachedAllDirectoryContent(fvm.Folder.Id);
+                else
+                    fvm.Contents = await CacheHelper.GetCachedDirectoryContentById(Id, FolderId);
+                return View(fvm);
+            }
+            catch (Exception)
+            {
+                return RedirectToAction("ErrorHandling", new { Code = 500 });
+            }
         }
         public async Task<ActionResult> SubFolder(Guid RootFolderId, long FolderId)
         {
-            FolderViewModel fvm = new FolderViewModel();
-            fvm.Folder = await CacheHelper.GetCachedFolder(RootFolderId);
-            fvm.Contents = await CacheHelper.GetCachedDirectoryContentById(RootFolderId, FolderId);
-            fvm.Directory = await CacheHelper.GetCachedContentById(RootFolderId, FolderId);
-            return Json(new { isSuccessfull = true, PageContent = ViewHelper.RenderViewToString(this, "_FolderPartial", fvm) });
+            try
+            {
+                FolderViewModel fvm = new FolderViewModel();
+                fvm.Folder = await CacheHelper.GetCachedFolder(RootFolderId);
+                fvm.Contents = await CacheHelper.GetCachedDirectoryContentById(RootFolderId, FolderId);
+                fvm.Directory = await CacheHelper.GetCachedContentById(RootFolderId, FolderId);
+                return Json(new { isSuccessfull = true, PageContent = ViewHelper.RenderViewToString(this, "_FolderPartial", fvm) });
+            }
+            catch (Exception)
+            {
+                return RedirectToAction("ErrorHandling", new { Code = 500 });
+            }
         }
 
         //create new folder
@@ -229,18 +348,26 @@ namespace FileShareWebUI2.Controllers
         [HttpPost]
         public async Task<ActionResult> AddSubFolder(string FolderName, string RootPath, Guid RootFolderId,long RootFolderDirectoryId)
         {
-            var result = await ApiHelper.Call(ApiHelper.HttpMethods.Post, $"{BaseApiAddress}/Folder/AddSubFolder",ApiHelper.Serialize(Path.Combine(RootPath, FolderName)));
-            if (!result.IsSuccessfulResult())
-                return Json(new { Successfull = false });
-            else
+            try
             {
-                if (ApiHelper.Deserialize<bool>(result.Content))
-                {
-                    var contents = await CacheHelper.GetCachedDirectoryContentById(RootFolderId, RootFolderDirectoryId, true);
-                    return Json(new { isSuccessfull = true, PageContent = ViewHelper.RenderViewToString(this, "_FolderTableContentPartial", contents) });
-                }
+                var result = await ApiHelper.Call(ApiHelper.HttpMethods.Post, $"{BaseApiAddress}/Folder/AddSubFolder", ApiHelper.Serialize(Path.Combine(RootPath, FolderName)));
+                if (!result.IsSuccessfulResult())
+                    return Json(new { Successfull = false });
                 else
-                    return Json(new { isSuccessfull = false });
+                {
+                    if (ApiHelper.Deserialize<bool>(result.Content))
+                    {
+                        var contents = await CacheHelper.GetCachedDirectoryContentById(RootFolderId, RootFolderDirectoryId, true);
+                        FolderViewModel fvm = new FolderViewModel() { Contents = contents, Folder = await CacheHelper.GetCachedFolder(RootFolderId), Directory = await CacheHelper.GetCachedContentById(RootFolderId, RootFolderDirectoryId) };
+                        return Json(new { isSuccessfull = true, PageContent = ViewHelper.RenderViewToString(this, "_FolderTableContentPartial", fvm) });
+                    }
+                    else
+                        return Json(new { isSuccessfull = false });
+                }
+            }
+            catch (Exception)
+            {
+                return RedirectToAction("ErrorHandling", new { Code = 500 });
             }
         }
 
@@ -270,56 +397,76 @@ namespace FileShareWebUI2.Controllers
         [HttpPost]
         public string MultiUpload(string id, string fileName)
         {
-            var chunkNumber = id;
-            var chunks = Request.InputStream;
-            string newpath = Path.Combine(UploadTempFolder, fileName + chunkNumber);
-            using (FileStream fs = System.IO.File.Create(newpath))
+            try
             {
-                byte[] bytes = new byte[3757000];
-                int bytesRead;
-                while ((bytesRead = Request.InputStream.Read(bytes, 0, bytes.Length)) > 0)
+                var chunkNumber = id;
+                var chunks = Request.InputStream;
+                string newpath = Path.Combine(UploadTempFolder, fileName + chunkNumber);
+                using (FileStream fs = System.IO.File.Create(newpath))
                 {
-                    fs.Write(bytes, 0, bytesRead);
+                    byte[] bytes = new byte[3757000];
+                    int bytesRead;
+                    while ((bytesRead = Request.InputStream.Read(bytes, 0, bytes.Length)) > 0)
+                    {
+                        fs.Write(bytes, 0, bytesRead);
+                    }
                 }
+                return "done";
             }
-            return "done";
+            catch (Exception)
+            {
+                return "error";
+            }
         }
 
         [HttpPost]
         public async Task<ActionResult> UploadComplete(string fileName, string RootPath, Guid RootFolderId, long RootFolderDirectoryId)
         {
-            string newPath = Path.Combine(UploadTempFolder, fileName);
-            string[] filePaths = Directory.GetFiles(UploadTempFolder).Where(p => p.Contains(fileName)).OrderBy(p => Int32.Parse(p.Replace(fileName, "$").Split('$')[1])).ToArray();
-            foreach (string filePath in filePaths)
+            try
             {
-                MergeFiles(newPath, filePath);
+                string newPath = Path.Combine(UploadTempFolder, fileName);
+                string[] filePaths = Directory.GetFiles(UploadTempFolder).Where(p => p.Contains(fileName)).OrderBy(p => Int32.Parse(p.Replace(fileName, "$").Split('$')[1])).ToArray();
+                foreach (string filePath in filePaths)
+                {
+                    MergeFiles(newPath, filePath);
+                }
+                System.IO.File.Move(Path.Combine(UploadTempFolder, fileName), Path.Combine(RootPath, fileName));
+                var contents = await CacheHelper.GetCachedDirectoryContentById(RootFolderId, RootFolderDirectoryId, true);
+                return Json(new { isSuccessfull = true, PageContent = ViewHelper.RenderViewToString(this, "_FolderTableContentPartial", contents) });
             }
-            System.IO.File.Move(Path.Combine(UploadTempFolder, fileName), Path.Combine(RootPath, fileName));
-            var contents = await CacheHelper.GetCachedDirectoryContentById(RootFolderId, RootFolderDirectoryId, true);
-            return Json(new { isSuccessfull = true, PageContent = ViewHelper.RenderViewToString(this, "_FolderTableContentPartial", contents) });
+            catch (Exception)
+            {
+                return Json(new { isSuccessfull = false });
+            }
         }
 
         private static void MergeFiles(string file1, string file2)
         {
-            FileStream fs1 = null;
-            FileStream fs2 = null;
             try
             {
-                fs1 = System.IO.File.Open(file1, FileMode.Append);
-                fs2 = System.IO.File.Open(file2, FileMode.Open);
-                byte[] fs2Content = new byte[fs2.Length];
-                fs2.Read(fs2Content, 0, (int)fs2.Length);
-                fs1.Write(fs2Content, 0, (int)fs2.Length);
+                FileStream fs1 = null;
+                FileStream fs2 = null;
+                try
+                {
+                    fs1 = System.IO.File.Open(file1, FileMode.Append);
+                    fs2 = System.IO.File.Open(file2, FileMode.Open);
+                    byte[] fs2Content = new byte[fs2.Length];
+                    fs2.Read(fs2Content, 0, (int)fs2.Length);
+                    fs1.Write(fs2Content, 0, (int)fs2.Length);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message + " : " + ex.StackTrace);
+                }
+                finally
+                {
+                    if (fs1 != null) fs1.Close();
+                    if (fs2 != null) fs2.Close();
+                    System.IO.File.Delete(file2);
+                }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Console.WriteLine(ex.Message + " : " + ex.StackTrace);
-            }
-            finally
-            {
-                if (fs1 != null) fs1.Close();
-                if (fs2 != null) fs2.Close();
-                System.IO.File.Delete(file2);
             }
         }
 
@@ -327,165 +474,237 @@ namespace FileShareWebUI2.Controllers
 
         public async Task<bool> DownloadFile(long FileId, Guid RootFolderId)
         {
-            Stream stream = null;
-            var file = await CacheHelper.GetCachedContentById(RootFolderId,FileId);
-            int bytesToRead = 200000;
-            byte[] buffer = new Byte[bytesToRead];
             try
             {
-                HttpWebRequest fileReq = (HttpWebRequest)HttpWebRequest.Create(file.Vpath);
-                HttpWebResponse fileResp = (HttpWebResponse)fileReq.GetResponse();
-                if (fileReq.ContentLength > 0)
-                    fileResp.ContentLength = fileReq.ContentLength;
-                stream = fileResp.GetResponseStream();
-                var resp = Response;
-                resp.ContentType = MediaTypeNames.Application.Octet;
-                resp.AddHeader("Content-Disposition", "attachment; filename=\"" + file.Title + "\"");
-                resp.AddHeader("Content-Length", fileResp.ContentLength.ToString());
-                int length;
-                do
+                Stream stream = null;
+                var file = await CacheHelper.GetCachedContentById(RootFolderId, FileId);
+                int bytesToRead = 200000;
+                byte[] buffer = new Byte[bytesToRead];
+                try
                 {
-                    if (resp.IsClientConnected)
+                    HttpWebRequest fileReq = (HttpWebRequest)HttpWebRequest.Create(file.Vpath);
+                    HttpWebResponse fileResp = (HttpWebResponse)fileReq.GetResponse();
+                    if (fileReq.ContentLength > 0)
+                        fileResp.ContentLength = fileReq.ContentLength;
+                    stream = fileResp.GetResponseStream();
+                    var resp = Response;
+                    resp.ContentType = MediaTypeNames.Application.Octet;
+                    resp.AddHeader("Content-Disposition", "attachment; filename=\"" + file.Title + "\"");
+                    resp.AddHeader("Content-Length", fileResp.ContentLength.ToString());
+                    int length;
+                    do
                     {
-                        length = stream.Read(buffer, 0, bytesToRead);
-                        resp.OutputStream.Write(buffer, 0, length);
-                        resp.Flush();
-                        buffer = new Byte[bytesToRead];
-                    }
-                    else
-                    {
-                        length = -1;
-                    }
-                } while (length > 0); //Repeat until no data is read
-            }
-            finally
-            {
-                if (stream != null)
-                {
-                    stream.Close();
+                        if (resp.IsClientConnected)
+                        {
+                            length = stream.Read(buffer, 0, bytesToRead);
+                            resp.OutputStream.Write(buffer, 0, length);
+                            resp.Flush();
+                            buffer = new Byte[bytesToRead];
+                        }
+                        else
+                        {
+                            length = -1;
+                        }
+                    } while (length > 0); //Repeat until no data is read
                 }
+                finally
+                {
+                    if (stream != null)
+                    {
+                        stream.Close();
+                    }
+                }
+                return true;
             }
-            return true;
+            catch (Exception)
+            {
+                return false;
+            }
         }
         //view file in folder
 
         public async Task<ActionResult> ViewFile(long FileId, Guid RootFolderId)
         {
-            FileViewModel fvm = new FileViewModel();
-            fvm.CurrentFile = await CacheHelper.GetCachedContentById(RootFolderId, FileId);
-            fvm.RootFolderId = RootFolderId;
-            if (fvm.CurrentFile.FileContentType == FileContentType.Doc || fvm.CurrentFile.FileContentType == FileContentType.Presentation ||
-                fvm.CurrentFile.FileContentType == FileContentType.Pdf || fvm.CurrentFile.FileContentType == FileContentType.SpreadSheet)
-                    return View("DocViewer",fvm);
-            if (fvm.CurrentFile.FileContentType == FileContentType.Audio || fvm.CurrentFile.FileContentType == FileContentType.Video ||
-                fvm.CurrentFile.FileContentType == FileContentType.Picture)
+            try
             {
-                fvm.RelatedFiles = await CacheHelper.GetCachedRelatedContentById(RootFolderId, fvm.CurrentFile.RootFolderId, FileId, fvm.CurrentFile.FileContentType);
-                return View("MultimediaViewer", fvm);
+                FileViewModel fvm = new FileViewModel();
+                fvm.CurrentFile = await CacheHelper.GetCachedContentById(RootFolderId, FileId);
+                fvm.RootFolderId = RootFolderId;
+                if (fvm.CurrentFile.FileContentType == FileContentType.Doc || fvm.CurrentFile.FileContentType == FileContentType.Presentation ||
+                    fvm.CurrentFile.FileContentType == FileContentType.Pdf || fvm.CurrentFile.FileContentType == FileContentType.SpreadSheet)
+                    return View("DocViewer", fvm);
+                if (fvm.CurrentFile.FileContentType == FileContentType.Audio || fvm.CurrentFile.FileContentType == FileContentType.Video ||
+                    fvm.CurrentFile.FileContentType == FileContentType.Picture)
+                {
+                    fvm.RelatedFiles = await CacheHelper.GetCachedRelatedContentById(RootFolderId, fvm.CurrentFile.RootFolderId, FileId, fvm.CurrentFile.FileContentType);
+                    return View("MultimediaViewer", fvm);
+                }
+                else
+                    return RedirectToAction("DownloadFile", new { FileId = FileId, RootFolderId = RootFolderId });
             }
-            else
-                return RedirectToAction("DownloadFile",new { FileId = FileId , RootFolderId = RootFolderId });
+            catch (Exception)
+            {
+                return RedirectToAction("ErrorHandling", new { Code = 500 });
+            }
         }
         public async Task<ActionResult> ViewFileJson(long FileId, Guid RootFolderId)
         {
-            FileViewModel fvm = new FileViewModel();
-            fvm.CurrentFile = await CacheHelper.GetCachedContentById(RootFolderId, FileId);
-            fvm.RootFolderId = RootFolderId;
-            fvm.RelatedFiles = await CacheHelper.GetCachedRelatedContentById(RootFolderId, fvm.CurrentFile.RootFolderId,FileId, fvm.CurrentFile.FileContentType);
-            return Json(new { isSuccessfull = true, PageContent = ViewHelper.RenderViewToString(this, "_MultimediaViewerPartial", fvm) });
+            try
+            {
+                FileViewModel fvm = new FileViewModel();
+                fvm.CurrentFile = await CacheHelper.GetCachedContentById(RootFolderId, FileId);
+                fvm.RootFolderId = RootFolderId;
+                fvm.RelatedFiles = await CacheHelper.GetCachedRelatedContentById(RootFolderId, fvm.CurrentFile.RootFolderId, FileId, fvm.CurrentFile.FileContentType);
+                return Json(new { isSuccessfull = true, PageContent = ViewHelper.RenderViewToString(this, "_MultimediaViewerPartial", fvm) });
+            }
+            catch (Exception)
+            {
+                return Json(new { isSuccessfull = false });
+            }
         }
         public async Task<ActionResult> MediaGallery(long FolderId, Guid RootFolderId,FileContentType FileType)
         {
-            FileViewModel fvm = new FileViewModel();
-            fvm.RootFolderId = RootFolderId;
-            fvm.FolderId = FolderId;
-            fvm.RelatedFiles = await CacheHelper.GetCachedRelatedContentForGallery(RootFolderId, FolderId,FileType,0,
-                FileType == FileContentType.Video ? 9 : FileType == FileContentType.Audio ? 30 : 60);
-            return View(fvm);
+            try
+            {
+                FileViewModel fvm = new FileViewModel();
+                fvm.RootFolderId = RootFolderId;
+                fvm.FolderId = FolderId;
+                fvm.RelatedFiles = await CacheHelper.GetCachedRelatedContentForGallery(RootFolderId, FolderId, FileType, 0,
+                    FileType == FileContentType.Video ? 9 : FileType == FileContentType.Audio ? 30 : 60);
+                fvm.GalleryContext = FileType;
+                return View(fvm);
+            }
+            catch (Exception)
+            {
+                return RedirectToAction("ErrorHandling", new { Code = 500 });
+            }
         }
         public async Task<ActionResult> MediaGalleryPagination(long FolderId, Guid RootFolderId, FileContentType FileType,int currentPage)
         {
-            FileViewModel fvm = new FileViewModel();
-            fvm.RootFolderId = RootFolderId;
-            fvm.FolderId = FolderId;
-            fvm.RelatedFiles = await CacheHelper.GetCachedRelatedContentForGallery(RootFolderId, FolderId, FileType
-                , currentPage,FileType == FileContentType.Video ? 9 : FileType == FileContentType.Audio ? 30 : 60);
-            return Json(new { isSuccessfull = true, PageContent = ViewHelper.RenderViewToString(this, "_MediaGalleryPartial",fvm),noMore = fvm.RelatedFiles.Count == 0 ? true : false });
+            try
+            {
+                FileViewModel fvm = new FileViewModel();
+                fvm.RootFolderId = RootFolderId;
+                fvm.FolderId = FolderId;
+                fvm.RelatedFiles = await CacheHelper.GetCachedRelatedContentForGallery(RootFolderId, FolderId, FileType
+                    , currentPage, FileType == FileContentType.Video ? 9 : FileType == FileContentType.Audio ? 30 : 60);
+                fvm.GalleryContext = FileType;
+                return Json(new { isSuccessfull = true, PageContent = ViewHelper.RenderViewToString(this, "_MediaGalleryPartial", fvm), noMore = fvm.RelatedFiles.Count == 0 ? true : false });
+            }
+            catch (Exception)
+            {
+                return Json(new { isSuccessfull = false });
+            }
         }
 
         //general section
         [AllowAnonymous]
         public ActionResult Login()
         {
-            return View();
+            try
+            {
+                return View();
+            }
+            catch (Exception)
+            {
+                return RedirectToAction("ErrorHandling", new { Code = 500 });
+            }
         }
         [HttpPost]
         [AllowAnonymous]
         public async Task<ActionResult> SubmitLogin(LoginCredential credential)
         {
-            //credential.Password = Encryption.EncryptStringView(credential.Password);
-            var body = ApiHelper.Serialize(credential);
-            var result = await ApiHelper.Call(ApiHelper.HttpMethods.Post, $"{BaseApiAddress}/User/LoginUser", body);
-            if (!result.IsSuccessfulResult())
-                return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
-            var Content = ApiHelper.Deserialize<LoginResult>(result.Content);
-            if (Content.successLogin)
+            try
             {
-                //build cookie
-                var userDataCookie = new HttpCookie("FSCookie");
-                userDataCookie.Values.Add("UserId", Content.User.Id.ToString());
-                userDataCookie.Values.Add("UserLevel", Content.User.IsAdmin ? "Admin" : "Simple");
-                userDataCookie.Values.Add("Fullname", Content.User.Fullname);
-                userDataCookie.HttpOnly = true;
-                userDataCookie.Expires = DateTime.Now.AddHours(8);
-                Response.Cookies.Add(userDataCookie);
-                FormsAuthentication.SetAuthCookie(Content.User.Username, true);
-                CacheHelper.createInstance();
-                return RedirectToAction("Index");
+                //credential.Password = Encryption.EncryptStringView(credential.Password);
+                var body = ApiHelper.Serialize(credential);
+                var result = await ApiHelper.Call(ApiHelper.HttpMethods.Post, $"{BaseApiAddress}/User/LoginUser", body);
+                if (!result.IsSuccessfulResult())
+                    return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
+                var Content = ApiHelper.Deserialize<LoginResult>(result.Content);
+                if (Content.successLogin)
+                {
+                    //build cookie
+                    var userDataCookie = new HttpCookie("FSCookie");
+                    userDataCookie.Values.Add("UserId", Content.User.Id.ToString());
+                    userDataCookie.Values.Add("UserLevel", Content.User.IsAdmin ? "Admin" : "Simple");
+                    userDataCookie.Values.Add("Fullname", Content.User.Fullname);
+                    userDataCookie.HttpOnly = true;
+                    userDataCookie.Expires = DateTime.Now.AddHours(8);
+                    Response.Cookies.Add(userDataCookie);
+                    FormsAuthentication.SetAuthCookie(Content.User.Username, true);
+                    CacheHelper.createInstance();
+                    return RedirectToAction("Index");
+                }
+                else
+                {
+                    TempData["LoginError"] = Content.message;
+                    return RedirectToAction("Login");
+                }
             }
-            else
+            catch (Exception)
             {
-                TempData["LoginError"] = Content.message;
-                return RedirectToAction("Login");
+                return RedirectToAction("ErrorHandling", new { Code = 500 });
             }
         }
         public ActionResult Logout()
         {
-            FormsAuthentication.SignOut();
-            if (Request.Cookies["FSCookie"] != null)
-            {
-                var c = new HttpCookie("FSCookie")
-                {
-                    Expires = DateTime.Now.AddDays(-1)
-                };
-                Response.Cookies.Add(c);
-            }
             try
             {
-                CacheHelper.ReleaseResources();
+                FormsAuthentication.SignOut();
+                if (Request.Cookies["FSCookie"] != null)
+                {
+                    var c = new HttpCookie("FSCookie")
+                    {
+                        Expires = DateTime.Now.AddDays(-1)
+                    };
+                    Response.Cookies.Add(c);
+                }
+                try
+                {
+                    CacheHelper.ReleaseResources();
+                }
+                catch (Exception)
+                {
+                }
+                return RedirectToAction("Login");
             }
             catch (Exception)
             {
+                return RedirectToAction("ErrorHandling", new { Code = 500 });
             }
-            return RedirectToAction("Login");
         }
         public async Task<ActionResult> Index()
         {
-            var userdata = CacheHelper.GetCachedUserData();
-            List<FolderDTO> Content = null;
-            if (!IsFoldersChanged)
-                Content = await CacheHelper.GetCachedFolders(userdata.UserId, userdata.IsAdmin);
-            else
+            try
             {
-                Content = await CacheHelper.GetCachedFolders(userdata.UserId, userdata.IsAdmin, true, true);
-                IsFoldersChanged = false;
+                var userdata = CacheHelper.GetCachedUserData();
+                List<FolderDTO> Content = null;
+                if (!IsFoldersChanged)
+                    Content = await CacheHelper.GetCachedFolders(userdata.UserId, userdata.IsAdmin);
+                else
+                {
+                    Content = await CacheHelper.GetCachedFolders(userdata.UserId, userdata.IsAdmin, true, true);
+                    IsFoldersChanged = false;
+                }
+                return View(Content);
             }
-            return View(Content);
+            catch (Exception)
+            {
+                return RedirectToAction("ErrorHandling", new { Code = 500 });
+            }
         }
         [AllowAnonymous]
         public ActionResult ErrorHandling(int Code = 0)
         {
-            return View(Code);
+            try
+            {
+                return View(Code);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
     }
 }

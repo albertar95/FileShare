@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/x-icon" href="@Url.Content("~/Content/assets/img/favicon.ico")">
     <title>File Share - @ViewData["Title"]</title>
     <!-- BOOTSTRAP STYLES-->
     <link href="@Url.Content("~/Content/assets/css/bootstrap.css")" rel="stylesheet" />
@@ -12,7 +13,7 @@
     <link href="@Url.Content("~/Content/assets/css/custom.css")" rel="stylesheet" />
     <!-- GOOGLE FONTS-->
     <link href='@Url.Content("~/Content/assets/fonts/googlefonts.css")' rel='stylesheet' type='text/css' />
-    @RenderSection("Styles",false)
+    @RenderSection("Styles", false)
 </head>
 <body>
     <div id="wrapper">
@@ -29,7 +30,7 @@
             <div style="color: white;
 padding: 15px 50px 5px 50px;
 float: right;
-font-size: 16px;">Username : Anonymous &nbsp;<a data-toggle="modal" data-target="#LogoutModal" class="btn btn-danger square-btn-adjust">Logout</a></div>
+font-size: 16px;">Username : @string.Format("{0}",FileShareWebUI2.Helpers.CacheHelper.userData.UserId == Guid.Empty ? "Anonymous": FileShareWebUI2.Helpers.CacheHelper.userData.Fullname) &nbsp;<a data-toggle="modal" data-target="#LogoutModal" class="btn btn-danger square-btn-adjust">Logout</a></div>
         </nav>
         <!-- /. NAV TOP  -->
         <nav class="navbar-default navbar-side" role="navigation">

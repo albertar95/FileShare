@@ -14,6 +14,7 @@ namespace Application.Model
         public string Path { get; set; }
         public string Vpath { get; set; }
         public string Format { get; set; }
+        public string MimeType { get; set; }
         public int HeightLevel { get; set; }
         public long RootFolderId { get; set; }
         public long SecondaryIndex { get; set; }

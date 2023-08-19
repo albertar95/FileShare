@@ -164,6 +164,7 @@ namespace FileShareWebUI2.Helpers
         }
         public static async Task<List<DirectoryContent>> GetCachedRelatedContentForGallery(Guid FolderId, long RootFolderId, FileContentType FileType,int skip = 0,int PageSize = 10, bool refresh = false)
         {
+            List<DirectoryContent> result = new List<DirectoryContent>();
             if (!refresh)
             {
                 if (!DirectoryRepository.Any(p => p.Key == FolderId))
@@ -181,7 +182,7 @@ namespace FileShareWebUI2.Helpers
                 if (!await FetchDirectoryContent(FolderId))
                     return new List<DirectoryContent>();
             }
-            var result = DirectoryRepository.FirstOrDefault(p => p.Key == FolderId).Value.
+            result = DirectoryRepository.FirstOrDefault(p => p.Key == FolderId).Value.
             Where(p => p.RootFolderId == RootFolderId && p.FileContentType == FileType).ToList().Skip(skip*PageSize).Take(PageSize).ToList();
             long counter = skip * PageSize + 1;
             result.ForEach(x => { x.SecondaryIndex = counter;counter++; });

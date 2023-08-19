@@ -10,13 +10,18 @@ namespace Application.Helpers
     public class DirectoryHelper : IDirectoryHelper
     {
         private static List<string> PictureExts = new List<string>() { ".jpg", ".png", ".gif" };
-        private static List<string> VideoExts = new List<string>() { ".mp4", ".mov", ".flv", ".ts",".mkv" };
+        private static List<string> VideoExts = new List<string>() { ".mp4", ".mov", ".flv", ".ts",".mkv",".avi", ".wmv", ".3gp", ".webm", ".vob", ".m4v" };
         private static List<string> PdfExts = new List<string>() { ".pdf" };
         private static List<string> DocExts = new List<string>() { ".doc", ".docx" };
         private static List<string> SpreadSheetExts = new List<string>() { ".xls", ".xlsx" };
         private static List<string> PresentationExts = new List<string>() { ".ppt", ".pptx" };
-        private static List<string> AudioExts = new List<string>() { ".mp3", ".wav" };
+        private static List<string> AudioExts = new List<string>() { ".mp3", ".wav", ".flac", ".m4a", ".wma" };
         private static List<string> CompressExts = new List<string>() { ".zip", ".rar", ".7z" };
+        private static Dictionary<string, string> Mimes = new Dictionary<string, string>()
+        { {".mp4","video/mp4"},{".mov","video/quicktime"},{".flv","video/x-flv"},{".ts","video/mp2t"},{".mkv","video/x-matroska"},{ ".avi","video/x-msvideo"}
+        ,{ ".wmv","video/x-ms-wmv"},{ ".3gp","video/3gpp"},{ ".webm","video/webm"},{ ".vob","video/dvd video/mpeg"},{ ".m4v","video/x-m4v"},
+            { ".mp3","audio/mpeg"},{ ".wav","audio/x-wav"},{ ".flac","audio/x-flac"},{ ".m4a","audio/m4a"},{ ".wma","audio/x-ms-wma"} };
+        //{ ".mp4", ".mov", ".flv", ".ts", ".mkv" };
         public bool CheckDirectory(string path)
         {
             return Directory.Exists(path);
@@ -122,6 +127,7 @@ namespace Application.Helpers
                         ContentType = FolderContentType.Folder,
                         Path = dir,
                         Format = ".dir",
+                        MimeType = "",
                         Title = dir.Split('\\').Last(),
                         HeightLevel = height,
                         RootFolderId = rootId,
@@ -131,16 +137,19 @@ namespace Application.Helpers
                 }
                 foreach (var dir in Directory.GetFiles(path))
                 {
+                    var tmpFormat = Path.GetExtension(dir);
+                    var tmpFileType = GetFileType(dir);
                     result.Add(new DirectoryContent()
                     {
                         Id = ++startIndex,
                         ContentType = FolderContentType.File,
                         Path = dir,
-                        Format = Path.GetExtension(dir),
+                        Format = tmpFormat,
+                        MimeType = string.Format("{0}",tmpFileType == FileContentType.Video || tmpFileType == FileContentType.Audio ? Mimes.FirstOrDefault(p => p.Key == tmpFormat).Value : ""),
                         Title = Path.GetFileName(dir),
                         HeightLevel = height,
                         RootFolderId = rootId,
-                        FileContentType = GetFileType(dir),
+                        FileContentType = tmpFileType,
                         Vpath = string.Concat(vpath, dir.Replace(path, "").Replace('\\', '/')).ToLower().Replace(" ", "%20")
                     });
                 }

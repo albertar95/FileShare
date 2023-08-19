@@ -12,5 +12,6 @@ namespace FileShareWebUI2.ViewModels
         public List<DirectoryContent> RelatedFiles { get; set; }
         public Guid RootFolderId { get; set; }
         public long FolderId { get; set; }
+        public FileContentType GalleryContext { get; set; }
     }
 }
