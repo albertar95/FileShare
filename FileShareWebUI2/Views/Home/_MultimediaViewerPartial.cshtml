@@ -30,7 +30,7 @@
         <source src="@Model.CurrentFile.Vpath" type="@Model.CurrentFile.MimeType" size="1440">
 
         <!-- Caption files -->
-        @*<track kind="subtitles" label="Persian" srclang="fa" src="~/files/demo.srt" default>*@
+        <track kind="captions" label="caption" srclang="en" src="@Model.CurrentFile.Vpath.Replace(Model.CurrentFile.Format,".vtt")" default>
 
         <!-- Fallback for browsers that don't support the <video> element -->
         <a href="@Url.Action("DownloadFile","Home",new { RootFolderId = Model.RootFolderId, FileId = Model.CurrentFile.Id })" download>Download</a>
