@@ -123,7 +123,7 @@
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                     <h4 class="modal-title" id="myModalLabel">New Folder</h4>
                 </div>
-                <form>
+                <form id="frmAddFolder">
                     <div class="modal-body">
                         <input class="form-control" name="FolderName" id="AddSubFolderFolderName" placeholder="Folder Name" autofocus />
                         <input id="AddSubFolderRootPath" value="@Model.Directory.Path" hidden readonly />
@@ -144,7 +144,7 @@
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                     <h4 class="modal-title" id="myModalLabel">Upload File</h4>
                 </div>
-                <form>
+                <form id="frmUploadFile">
                     <div class="modal-body">
                         <input class="form-control" name="FileUpload" id="FileUpload" type="file" />
                         <input id="UploadRootPath" value="@Model.Directory.Path" hidden readonly />
@@ -251,7 +251,6 @@
                     },
                     success: function (result)
                     {
-                        $("#NewFolderModal").modal('hide');
                         if (result.isSuccessfull)
                             $("#tblContents").html(result.PageContent);
                         else
@@ -266,7 +265,6 @@
                     },
                     error: function ()
                     {
-                        $("#NewFolderModal").modal('hide');
                         $("#txtError").text('خطا در انجام عملیات');
                         $("#divError").removeAttr('hidden');
                         window.setTimeout(function () {
@@ -274,6 +272,8 @@
                         }, 10000);
                     }
                 });
+            $("#NewFolderModal").modal('hide');
+            $("#AddSubFolderFolderName").val('');
         }
 
         //upload file section
@@ -307,6 +307,7 @@
                 progressBarUpdate(100);
                 progressBarComplete();
                 $("#UploadModal").modal('hide');
+                $("#FileUpload").val('');
                 if (result.isSuccessfull)
                     $("#tblContents").html(result.PageContent);
                 else {

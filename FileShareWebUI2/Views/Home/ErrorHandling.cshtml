@@ -1,4 +1,4 @@
-﻿@model int
+﻿@model Tuple<int,string>
 @{
     Layout = null;
 }
@@ -10,6 +10,7 @@
     <meta name="viewport" content="width=device-width" />
     <title>Http Error</title>
     <link href="@Url.Content("~/Content/assets/css/ErrorHandle.css")" rel="stylesheet" />
+    <link rel="icon" type="image/x-icon" href="@Url.Content("~/Content/assets/img/favicon.ico")">
 </head>
 <body>
     <div class="container">
@@ -17,10 +18,10 @@
             <div class="col-lg-2"></div>
             <div class="col-lg-8">
                 <div class="col-lg-12 text-404">
-                    <b>@Model</b>
+                    <b>@Model.Item1</b>
                 </div>
                 <div class="col-lg-12 text">
-                    @switch (Model)
+                    @switch (Model.Item1)
                     {
                         case 400:
                             <b> BAD REQUEST </b>
@@ -54,12 +55,18 @@
                             break;
                     }
                 </div>
+                @if (!string.IsNullOrWhiteSpace(Model.Item2))
+                {
+                    <div class="col-lg-12 text" style="margin:25px;">
+                        <p>Message : @Model.Item2</p>
+                    </div>
+                }
                 <div class="col-lg-12 text-btn">
                     <a href="/" class="btn btn-outline-primary">BACK TO HOME</a>
                 </div>
             </div>
-            <div class="col-lg-2"></div>
-        </div>
+                <div class="col-lg-2"></div>
+            </div>
     </div>
 </body>
 </html>

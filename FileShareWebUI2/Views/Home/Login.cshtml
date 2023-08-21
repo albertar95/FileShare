@@ -1,4 +1,4 @@
-﻿
+﻿@model string
 @{
     Layout = null;
 }
@@ -10,6 +10,7 @@
     <meta name="viewport" content="width=device-width" />
     <title>Login</title>
     <link href="@Url.Content("~/Content/assets/css/Login.css")" rel="stylesheet" />
+    <link rel="icon" type="image/x-icon" href="@Url.Content("~/Content/assets/img/favicon.ico")">
 </head>
 <body>
     <form class="login" method="post" action="SubmitLogin">
@@ -17,6 +18,7 @@
         <p>Please log in</p>
         <input type="text" name="Username" placeholder="User Name" autofocus />
         <input type="password" name="Password" placeholder="Password" />
+        <input type="text" name="ReturnUrl" value="@TempData["RedirectUrl"]" hidden style="display:none;" />
         <input type="submit" value="Log In" />
         <div class="links">
             <p id="ErrorMessage" style="color:palevioletred;font-weight:bold;" hidden></p>

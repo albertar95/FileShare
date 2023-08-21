@@ -138,6 +138,8 @@
     <Compile Include="App_Start\Bootstrapper.cs" />
     <Compile Include="App_Start\SwaggerConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="Auth\Contract\IAccessControl.cs" />
+    <Compile Include="Auth\Service\AccessControl.cs" />
     <Compile Include="Controllers\FolderController.cs" />
     <Compile Include="Controllers\UserController.cs" />
     <Compile Include="Global.asax.cs">

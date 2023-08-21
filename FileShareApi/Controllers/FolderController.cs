@@ -1,8 +1,10 @@
 ﻿using Application.DTO.Folder;
+using Application.Helper;
 using Application.Helpers;
 using Application.Persistence;
 using Application.Service.EntityMapper;
 using Domain;
+using FileShareApi.Auth.Contract;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -17,33 +19,42 @@ namespace FileShareApi.Controllers
         private readonly IEntityMapper _mapper;
         private readonly IFolderRepository _folderRepository;
         private readonly IDirectoryHelper _directoryHelper;
-        public FolderController(IFolderRepository folderRepository,IEntityMapper mapper,IDirectoryHelper directoryHelper)
+        private readonly IAccessControl _accessControl;
+        private readonly IEncryptionHelper _encryptionHelper;
+        public FolderController(IFolderRepository folderRepository,IEntityMapper mapper,IDirectoryHelper directoryHelper, IAccessControl accessControl, IEncryptionHelper encryptionHelper)
         {
             _folderRepository = folderRepository;
             _mapper = mapper;
             _directoryHelper = directoryHelper;
+            _accessControl = accessControl;
+            _encryptionHelper = encryptionHelper;
         }
         [HttpPost]
         public async Task<IHttpActionResult> Post([FromBody] CreateFolderDTO folder)
         {
             try
             {
-                folder.Id = Guid.NewGuid();
-                if (folder.IsLocal)
+                if (_accessControl.Check(Request))
                 {
-                    if (!_directoryHelper.CheckDirectory(folder.Path))
-                        return InternalServerError(new Exception("folder path not exists."));
+                    folder.Id = Guid.NewGuid();
+                    if (folder.IsLocal)
+                    {
+                        if (!_directoryHelper.CheckDirectory(folder.Path))
+                            return InternalServerError(new Exception("folder path not exists."));
+                    }
+                    else
+                        folder.Path = $"{ConfigurationManager.AppSettings["RootVirtualFolders"]}\\{folder.Id}";
+                    if (_directoryHelper.CreateFolder(folder.Path, folder.Id.ToString(), folder.IsLocal))
+                    {
+                        //folder.VirtualPath = $"http://localhost:5394/content/files/demo";
+                        folder.VirtualPath = $"http://{ConfigurationManager.AppSettings["ServerIp"]}/fs/{folder.Id}";
+                        return Ok(await _folderRepository.Add(_mapper.EntityMap<Domain.Folder>(folder)));
+                    }
+                    else
+                        return InternalServerError(new Exception("error in creating folder or virtual directory"));
                 }
                 else
-                    folder.Path = $"{ConfigurationManager.AppSettings["RootVirtualFolders"]}\\{folder.Id}";
-                if (_directoryHelper.CreateFolder(folder.Path, folder.Id.ToString(), folder.IsLocal))
-                {
-                    //folder.VirtualPath = $"http://localhost:5394/content/files/demo";
-                    folder.VirtualPath = $"http://{ConfigurationManager.AppSettings["ServerIp"]}/fs/{folder.Id}";
-                    return Ok(await _folderRepository.Add(_mapper.EntityMap<Domain.Folder>(folder)));
-                }
-                else
-                    return InternalServerError(new Exception("error in creating folder or virtual directory"));
+                    return Unauthorized();
             }
             catch (Exception ex)
             {
@@ -55,16 +66,21 @@ namespace FileShareApi.Controllers
         {
             try
             {
-                var CurrentFolder = _folderRepository.GetFolderById(folder.Id);
-                if (CurrentFolder == null) return NotFound();
-                else
+                if (_accessControl.Check(Request))
                 {
-                    CurrentFolder = _mapper.EntityMap<Folder>(folder, CurrentFolder);
-                    if (await _folderRepository.Update(CurrentFolder))
-                        return Ok(true);
+                    var CurrentFolder = _folderRepository.GetFolderById(folder.Id);
+                    if (CurrentFolder == null) return NotFound();
                     else
-                        return InternalServerError();
+                    {
+                        CurrentFolder = _mapper.EntityMap<Folder>(folder, CurrentFolder);
+                        if (await _folderRepository.Update(CurrentFolder))
+                            return Ok(true);
+                        else
+                            return InternalServerError();
+                    }
                 }
+                else
+                    return Unauthorized();
             }
             catch (Exception ex)
             {
@@ -76,19 +92,24 @@ namespace FileShareApi.Controllers
         {
             try
             {
-                var folder = _folderRepository.GetFolderById(id);
-                if (folder == null) return NotFound();
-                else
+                if (_accessControl.Check(Request))
                 {
-                    var result = await _folderRepository.Delete(folder);
-                    if (result)
-                    {
-                        _directoryHelper.RemoveFolder(folder.Path, folder.VirtualPath, folder.IsLocal);
-                        return Ok(true);
-                    }
+                    var folder = _folderRepository.GetFolderById(id);
+                    if (folder == null) return NotFound();
                     else
-                        return InternalServerError();
+                    {
+                        var result = await _folderRepository.Delete(folder);
+                        if (result)
+                        {
+                            _directoryHelper.RemoveFolder(folder.Path, folder.VirtualPath, folder.IsLocal);
+                            return Ok(true);
+                        }
+                        else
+                            return InternalServerError();
+                    }
                 }
+                else
+                    return Unauthorized();
             }
             catch (Exception ex)
             {
@@ -101,7 +122,12 @@ namespace FileShareApi.Controllers
         {
             try
             {
-                return Ok(_mapper.EntityMap<List<FolderDTO>>(_folderRepository.GetFoldersByUserId(UserId, IncludePublics, HasAdminAccess, Skip, PageSize)));
+                if (_accessControl.Check(Request))
+                {
+                    return Ok(_mapper.EntityMap<List<FolderDTO>>(_folderRepository.GetFoldersByUserId(UserId, IncludePublics, HasAdminAccess, Skip, PageSize)));
+                }
+                else
+                    return Unauthorized();
             }
             catch (Exception ex)
             {
@@ -114,39 +140,12 @@ namespace FileShareApi.Controllers
         {
             try
             {
-                return Ok(_mapper.EntityMap<FolderDTO>(_folderRepository.GetFolderById(FolderId)));
-            }
-            catch (Exception ex)
-            {
-                return InternalServerError(ex);
-            }
-        }
-        [HttpGet]
-        [Route("GetFolderContentTreeById/{FolderId}")]
-        public IHttpActionResult GetFolderContentTreeById(Guid FolderId)
-        {
-            try
-            {
-                var tmpFolder = _mapper.EntityMap<FolderDTO>(_folderRepository.GetFolderById(FolderId));
-                if (tmpFolder != null)
+                if (_accessControl.Check(Request))
                 {
-                    var tmpDirectoryContents = _directoryHelper.GetFolderContent(tmpFolder.Path,tmpFolder.VirtualPath);
-                    tmpDirectoryContents.Add(new Application.Model.DirectoryContent()
-                     {
-                         Id = 0,
-                         ContentType = Application.Model.FolderContentType.Folder,
-                         Format = ".dir",
-                         HeightLevel = 0,
-                         Title = tmpFolder.Title,
-                         Path = tmpFolder.Path,
-                         RootFolderId = -1,
-                         FileContentType = Application.Model.FileContentType.Unknown,
-                         Vpath = tmpFolder.VirtualPath
-                     });
-                    return Ok(tmpDirectoryContents);
+                    return Ok(_mapper.EntityMap<FolderDTO>(_folderRepository.GetFolderById(FolderId)));
                 }
                 else
-                    return NotFound();
+                    return Unauthorized();
             }
             catch (Exception ex)
             {
@@ -159,7 +158,12 @@ namespace FileShareApi.Controllers
         {
             try
             {
-                return Ok(_directoryHelper.CreateSubFolder(path));
+                if (_accessControl.Check(Request))
+                {
+                    return Ok(_directoryHelper.CreateSubFolder(path));
+                }
+                else
+                    return Unauthorized();
             }
             catch (Exception ex)
             {

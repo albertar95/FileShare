@@ -38,14 +38,14 @@ namespace FileShareWebUI2.Controllers
                 {
                     var result = await ApiHelper.Call(ApiHelper.HttpMethods.Get, $"{BaseApiAddress}/User/Get");
                     if (!result.IsSuccessfulResult())
-                        return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
+                        return View("ErrorHandling", new Tuple<int, string>((int)result.ResultCode, ""));
                     Content = ApiHelper.Deserialize<List<UserDTO>>(result.Content);
                 }
                 return View(Content);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return RedirectToAction("ErrorHandling", new { Code = 500 });
+                return View("ErrorHandling", new Tuple<int, string>(500, ex.Message));
             }
         }
         public ActionResult AddUser()
@@ -54,9 +54,9 @@ namespace FileShareWebUI2.Controllers
             {
                 return View();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return RedirectToAction("ErrorHandling", new { Code = 500 });
+                return View("ErrorHandling", new Tuple<int, string>(500, ex.Message));
             }
         }
         public async Task<ActionResult> EditUser(Guid UserId)
@@ -65,14 +65,14 @@ namespace FileShareWebUI2.Controllers
             {
                 var result = await ApiHelper.Call(ApiHelper.HttpMethods.Get, $"{BaseApiAddress}/User/GetUserById/{UserId}");
                 if (!result.IsSuccessfulResult())
-                    return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
+                    return View("ErrorHandling", new Tuple<int, string>((int)result.ResultCode, ""));
                 var Content = ApiHelper.Deserialize<UpdateUserDTO>(result.Content);
-                Content.Password = Encoding.UTF8.GetString(Convert.FromBase64String(Content.Password));
+                Content.Password = CacheHelper.DecryptResult(Content.Password);
                 return View(Content);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return RedirectToAction("ErrorHandling", new { Code = 500 });
+                return View("ErrorHandling", new Tuple<int, string>(500, ex.Message));
             }
         }
         public async Task<ActionResult> UserDetail(Guid UserId)
@@ -81,7 +81,7 @@ namespace FileShareWebUI2.Controllers
             {
                 var result = await ApiHelper.Call(ApiHelper.HttpMethods.Get, $"{BaseApiAddress}/User/GetUserById/{UserId}");
                 if (!result.IsSuccessfulResult())
-                    return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
+                    return View("ErrorHandling", new Tuple<int, string>((int)result.ResultCode, ""));
                 var Content = ApiHelper.Deserialize<UserDTO>(result.Content);
                 return View(Content);
             }
@@ -101,7 +101,7 @@ namespace FileShareWebUI2.Controllers
                     var body = ApiHelper.Serialize(user);
                     var result = await ApiHelper.Call(ApiHelper.HttpMethods.Post, $"{BaseApiAddress}/User/Post", body);
                     if (!result.IsSuccessfulResult())
-                        return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
+                        return View("ErrorHandling", new Tuple<int, string>((int)result.ResultCode, ""));
                     if (ApiHelper.Deserialize<bool>(result.Content))
                         TempData["UserSuccess"] = "user created successfully.";
                     else
@@ -111,9 +111,9 @@ namespace FileShareWebUI2.Controllers
                 else
                     return RedirectToAction("Login");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return RedirectToAction("ErrorHandling", new { Code = 500 });
+                return View("ErrorHandling", new Tuple<int, string>(500, ex.Message));
             }
         }
         [HttpPost]
@@ -127,7 +127,7 @@ namespace FileShareWebUI2.Controllers
                     var body = ApiHelper.Serialize(user);
                     var result = await ApiHelper.Call(ApiHelper.HttpMethods.Post, $"{BaseApiAddress}/User/Patch", body);
                     if (!result.IsSuccessfulResult())
-                        return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
+                        return View("ErrorHandling", new Tuple<int, string>((int)result.ResultCode, ""));
                     if (ApiHelper.Deserialize<bool>(result.Content))
                         TempData["UserSuccess"] = "user edited successfully.";
                     else
@@ -137,9 +137,9 @@ namespace FileShareWebUI2.Controllers
                 else
                     return RedirectToAction("Login");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return RedirectToAction("ErrorHandling", new { Code = 500 });
+                return View("ErrorHandling", new Tuple<int, string>(500, ex.Message));
             }
         }
         public async Task<ActionResult> SubmitDeleteUser(Guid UserId)
@@ -152,7 +152,7 @@ namespace FileShareWebUI2.Controllers
                     {
                         var result = await ApiHelper.Call(ApiHelper.HttpMethods.Delete, $"{BaseApiAddress}/User/Delete/{UserId}");
                         if (!result.IsSuccessfulResult())
-                            return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
+                            return View("ErrorHandling", new Tuple<int, string>((int)result.ResultCode, ""));
                         if (ApiHelper.Deserialize<bool>(result.Content))
                             TempData["UserSuccess"] = "user deleted successfully.";
                         else
@@ -165,9 +165,9 @@ namespace FileShareWebUI2.Controllers
                     TempData["UserError"] = "current user dont have access to complete this action.";
                 return RedirectToAction("Users");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return RedirectToAction("ErrorHandling", new { Code = 500 });
+                return View("ErrorHandling", new Tuple<int, string>(500, ex.Message));
             }
         }
         public async Task<ActionResult> UserProfile()
@@ -176,13 +176,13 @@ namespace FileShareWebUI2.Controllers
             {
                 var result = await ApiHelper.Call(ApiHelper.HttpMethods.Get, $"{BaseApiAddress}/User/GetUserById/{CacheHelper.GetCachedUserData().UserId}");
                 if (!result.IsSuccessfulResult())
-                    return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
+                    return View("ErrorHandling", new Tuple<int, string>((int)result.ResultCode, ""));
                 var Content = ApiHelper.Deserialize<UserDTO>(result.Content);
                 return View(Content);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return RedirectToAction("ErrorHandling", new { Code = 500 });
+                return View("ErrorHandling", new Tuple<int, string>(500, ex.Message));
             }
         }
 
@@ -194,13 +194,13 @@ namespace FileShareWebUI2.Controllers
             {
                 var result = await ApiHelper.Call(ApiHelper.HttpMethods.Get, $"{BaseApiAddress}/Folder/GetFoldersByUserId/{CacheHelper.GetCachedUserData().UserId}");
                 if (!result.IsSuccessfulResult())
-                    return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
+                    return View("ErrorHandling", new Tuple<int, string>((int)result.ResultCode, ""));
                 var Content = ApiHelper.Deserialize<List<FolderDTO>>(result.Content);
                 return View(Content);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return RedirectToAction("ErrorHandling", new { Code = 500 });
+                return View("ErrorHandling", new Tuple<int, string>(500, ex.Message));
             }
         }
         public ActionResult AddFolder()
@@ -209,9 +209,9 @@ namespace FileShareWebUI2.Controllers
             {
                 return View();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return RedirectToAction("ErrorHandling", new { Code = 500 });
+                return View("ErrorHandling", new Tuple<int, string>(500, ex.Message));
             }
         }
         public async Task<ActionResult> EditFolder(Guid FolderId)
@@ -220,13 +220,13 @@ namespace FileShareWebUI2.Controllers
             {
                 var result = await ApiHelper.Call(ApiHelper.HttpMethods.Get, $"{BaseApiAddress}/Folder/GetFolderById/{FolderId}");
                 if (!result.IsSuccessfulResult())
-                    return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
+                    return View("ErrorHandling", new Tuple<int, string>((int)result.ResultCode, ""));
                 var Content = ApiHelper.Deserialize<UpdateFolderDTO>(result.Content);
                 return View(Content);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return RedirectToAction("ErrorHandling", new { Code = 500 });
+                return View("ErrorHandling", new Tuple<int, string>(500, ex.Message));
             }
         }
         public async Task<ActionResult> FolderDetail(Guid FolderId)
@@ -235,13 +235,13 @@ namespace FileShareWebUI2.Controllers
             {
                 var result = await ApiHelper.Call(ApiHelper.HttpMethods.Get, $"{BaseApiAddress}/Folder/GetFolderById/{FolderId}");
                 if (!result.IsSuccessfulResult())
-                    return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
+                    return View("ErrorHandling", new Tuple<int, string>((int)result.ResultCode, ""));
                 var Content = ApiHelper.Deserialize<FolderDTO>(result.Content);
                 return View(Content);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return RedirectToAction("ErrorHandling", new { Code = 500 });
+                return View("ErrorHandling", new Tuple<int, string>(500, ex.Message));
             }
         }
         [HttpPost]
@@ -253,7 +253,7 @@ namespace FileShareWebUI2.Controllers
                 var body = ApiHelper.Serialize(folder);
                 var result = await ApiHelper.Call(ApiHelper.HttpMethods.Post, $"{BaseApiAddress}/Folder/Post", body);
                 if (!result.IsSuccessfulResult())
-                    return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
+                    return View("ErrorHandling", new Tuple<int, string>((int)result.ResultCode, ""));
                 if (ApiHelper.Deserialize<bool>(result.Content))
                     TempData["FolderSuccess"] = "folder created successfully.";
                 else
@@ -261,9 +261,9 @@ namespace FileShareWebUI2.Controllers
                 IsFoldersChanged = true;
                 return RedirectToAction("Folders");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return RedirectToAction("ErrorHandling", new { Code = 500 });
+                return View("ErrorHandling", new Tuple<int, string>(500, ex.Message));
             }
         }
         [HttpPost]
@@ -274,7 +274,7 @@ namespace FileShareWebUI2.Controllers
                 var body = ApiHelper.Serialize(folder);
                 var result = await ApiHelper.Call(ApiHelper.HttpMethods.Post, $"{BaseApiAddress}/Folder/Patch", body);
                 if (!result.IsSuccessfulResult())
-                    return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
+                    return View("ErrorHandling", new Tuple<int, string>((int)result.ResultCode, ""));
                 if (ApiHelper.Deserialize<bool>(result.Content))
                     TempData["FolderSuccess"] = "folder edited successfully.";
                 else
@@ -282,9 +282,9 @@ namespace FileShareWebUI2.Controllers
                 IsFoldersChanged = true;
                 return RedirectToAction("Folders");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return RedirectToAction("ErrorHandling", new { Code = 500 });
+                return View("ErrorHandling", new Tuple<int, string>(500, ex.Message));
             }
         }
         public async Task<ActionResult> SubmitDeleteFolder(Guid FolderId)
@@ -293,7 +293,7 @@ namespace FileShareWebUI2.Controllers
             {
                 var result = await ApiHelper.Call(ApiHelper.HttpMethods.Delete, $"{BaseApiAddress}/Folder/Delete/{FolderId}");
                 if (!result.IsSuccessfulResult())
-                    return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
+                    return View("ErrorHandling", new Tuple<int, string>((int)result.ResultCode, ""));
                 if (ApiHelper.Deserialize<bool>(result.Content))
                     TempData["FolderSuccess"] = "folder deleted successfully.";
                 else
@@ -301,9 +301,9 @@ namespace FileShareWebUI2.Controllers
                 IsFoldersChanged = true;
                 return RedirectToAction("Folders");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return RedirectToAction("ErrorHandling", new { Code = 500 });
+                return View("ErrorHandling", new Tuple<int, string>(500, ex.Message));
             }
         }
 
@@ -322,9 +322,9 @@ namespace FileShareWebUI2.Controllers
                     fvm.Contents = await CacheHelper.GetCachedDirectoryContentById(Id, FolderId);
                 return View(fvm);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return RedirectToAction("ErrorHandling", new { Code = 500 });
+                return View("ErrorHandling", new Tuple<int, string>(500, ex.Message));
             }
         }
         public async Task<ActionResult> SubFolder(Guid RootFolderId, long FolderId)
@@ -337,9 +337,9 @@ namespace FileShareWebUI2.Controllers
                 fvm.Directory = await CacheHelper.GetCachedContentById(RootFolderId, FolderId);
                 return Json(new { isSuccessfull = true, PageContent = ViewHelper.RenderViewToString(this, "_FolderPartial", fvm) });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return RedirectToAction("ErrorHandling", new { Code = 500 });
+                return View("ErrorHandling", new Tuple<int, string>(500, ex.Message));
             }
         }
 
@@ -365,9 +365,9 @@ namespace FileShareWebUI2.Controllers
                         return Json(new { isSuccessfull = false });
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return RedirectToAction("ErrorHandling", new { Code = 500 });
+                return View("ErrorHandling", new Tuple<int, string>(500, ex.Message));
             }
         }
 
@@ -542,9 +542,9 @@ namespace FileShareWebUI2.Controllers
                 else
                     return RedirectToAction("DownloadFile", new { FileId = FileId, RootFolderId = RootFolderId });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return RedirectToAction("ErrorHandling", new { Code = 500 });
+                return View("ErrorHandling", new Tuple<int, string>(500, ex.Message));
             }
         }
         public async Task<ActionResult> ViewFileJson(long FileId, Guid RootFolderId)
@@ -574,9 +574,9 @@ namespace FileShareWebUI2.Controllers
                 fvm.GalleryContext = FileType;
                 return View(fvm);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return RedirectToAction("ErrorHandling", new { Code = 500 });
+                return View("ErrorHandling", new Tuple<int, string>(500, ex.Message));
             }
         }
         public async Task<ActionResult> MediaGalleryPagination(long FolderId, Guid RootFolderId, FileContentType FileType,int currentPage)
@@ -599,15 +599,21 @@ namespace FileShareWebUI2.Controllers
 
         //general section
         [AllowAnonymous]
-        public ActionResult Login()
+        public ActionResult Login(string ReturnUrl = "")
         {
             try
             {
-                return View();
+                if (!User.Identity.IsAuthenticated)
+                {
+                    TempData["RedirectUrl"] = ReturnUrl;
+                    return View();
+                }
+                else
+                    return RedirectToAction("Index");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return RedirectToAction("ErrorHandling", new { Code = 500 });
+                return View("ErrorHandling", new Tuple<int, string>(500, ex.Message));
             }
         }
         [HttpPost]
@@ -616,11 +622,10 @@ namespace FileShareWebUI2.Controllers
         {
             try
             {
-                //credential.Password = Encryption.EncryptStringView(credential.Password);
                 var body = ApiHelper.Serialize(credential);
                 var result = await ApiHelper.Call(ApiHelper.HttpMethods.Post, $"{BaseApiAddress}/User/LoginUser", body);
                 if (!result.IsSuccessfulResult())
-                    return RedirectToAction("ErrorHandling", new { Code = (int)result.ResultCode });
+                    return View("ErrorHandling", new Tuple<int, string>((int)result.ResultCode, ""));
                 var Content = ApiHelper.Deserialize<LoginResult>(result.Content);
                 if (Content.successLogin)
                 {
@@ -634,7 +639,19 @@ namespace FileShareWebUI2.Controllers
                     Response.Cookies.Add(userDataCookie);
                     FormsAuthentication.SetAuthCookie(Content.User.Username, true);
                     CacheHelper.createInstance();
-                    return RedirectToAction("Index");
+                    if (string.IsNullOrWhiteSpace(credential.ReturnUrl))
+                        return RedirectToAction("Index");
+                    else
+                    {
+                        try
+                        {
+                            return Redirect(credential.ReturnUrl);
+                        }
+                        catch (Exception)
+                        {
+                            return RedirectToAction("Index");
+                        }
+                    }
                 }
                 else
                 {
@@ -642,9 +659,9 @@ namespace FileShareWebUI2.Controllers
                     return RedirectToAction("Login");
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return RedirectToAction("ErrorHandling", new { Code = 500 });
+                return View("ErrorHandling", new Tuple<int, string>(500, ex.Message));
             }
         }
         public ActionResult Logout()
@@ -669,9 +686,9 @@ namespace FileShareWebUI2.Controllers
                 }
                 return RedirectToAction("Login");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return RedirectToAction("ErrorHandling", new { Code = 500 });
+                return View("ErrorHandling", new Tuple<int, string>(500, ex.Message));
             }
         }
         public async Task<ActionResult> Index()
@@ -689,21 +706,9 @@ namespace FileShareWebUI2.Controllers
                 }
                 return View(Content);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return RedirectToAction("ErrorHandling", new { Code = 500 });
-            }
-        }
-        [AllowAnonymous]
-        public ActionResult ErrorHandling(int Code = 0)
-        {
-            try
-            {
-                return View(Code);
-            }
-            catch (Exception)
-            {
-                throw;
+                return View("ErrorHandling", new Tuple<int, string>(500, ex.Message));
             }
         }
     }

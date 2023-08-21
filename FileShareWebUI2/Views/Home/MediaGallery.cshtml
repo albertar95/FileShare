@@ -8,7 +8,7 @@
     <a href="@Url.Action("Folder","Home",new { Id = Model.RootFolderId, FolderId = Model.FolderId })" class="btn btn-default"><i class="fa fa-arrow-circle-o-left"></i> Return</a>
     @if (Model.GalleryContext == Application.Model.FileContentType.Audio)
     {
-    <button class="btn btn-success" onclick="PlayAllAudio()"><i class="fa fa-play-circle-o"></i> Play All</button>
+    <button class="btn btn-success" id="btnPlayAllAudio" onclick="PlayAllAudio()"><i class="fa fa-play-circle"></i> Play All</button>
     }
 </div>
 @for (int i = 0; i <= Model.RelatedFiles.Count / 3; i++)
@@ -44,7 +44,7 @@
                         }
                         @if (cfile.FileContentType == Application.Model.FileContentType.Audio)
                         {
-                            <audio class="player" id="@cfile.Id" style="max-width:100%;max-height:100%;" controls>
+                            <audio class="player audio" id="@cfile.SecondaryIndex" style="max-width:100%;max-height:100%;" controls>
                                 <source src="@cfile.Vpath" type="@cfile.MimeType" />
                             </audio>
                         }
@@ -92,8 +92,10 @@
     <script src="@Url.Content("~/Content/assets/vendor/plyr/js/plyr.js")"></script>
     <script src="@Url.Content("~/Content/assets/vendor/plyr/js/plyr.polyfilled.js")"></script>
     <script>
-                var loadMore = true;
+        var loadMore = true;
+        var isPlayAllOn = false;
         var imageplayInterval = null;
+        var currentPlayingId = 1;
         var isPlayOn = false;
         $(window).scroll(function () {
             if ($(window).scrollTop() == $(document).height() - $(window).height()) {
@@ -104,7 +106,10 @@
         $(function ()
         {
             $(".player").each(function () {
-                var tmpPlayer = new Plyr(document.getElementById($(this).attr('id')));
+                var tmpId = $(this).attr('id');
+                var tmpPlayer = new Plyr(document.getElementById(tmpId));
+                tmpPlayer.on('play', function () { mediaOnPlay(tmpId) });
+                tmpPlayer.on('ended', function () { mediaOnEnded(tmpId) });
             });
             document.onkeydown = function (e) {
                 if ($("#MediaModal").hasClass('in')) {
@@ -137,6 +142,20 @@
 
             });
         });
+        function mediaOnPlay(id)
+        {
+            $(".audio").each(function () {
+                var tmpPlayer = new Plyr(document.getElementById($(this).attr('id')));
+                tmpPlayer.stop();
+            });
+            currentPlayingId = id;
+        }
+        function mediaOnEnded(id) {
+            currentPlayingId = parseFloat(id) + parseFloat(1);
+            if (isPlayAllOn) {
+                playAudio();
+            }
+        }
         function StartImagePlay()
         {
             var maxIndex1 = parseFloat($(".gImage").length) - parseFloat(1);
@@ -214,7 +233,37 @@
         }
         function PlayAllAudio()
         {
-            alert("stay tuned");
+            if (isPlayAllOn) {
+                $("#btnPlayAllAudio").html('<i class="fa fa-play-circle"></i> Play All');
+                isPlayAllOn = false;
+                $(".audio").each(function () {
+                    alert($(this).attr('id'))
+                    var tmpPlayer = new Plyr(document.getElementById($(this).attr('id')));
+                    tmpPlayer.pause();
+                    tmpPlayer.stop();
+                });
+            } else
+            {
+                $("#btnPlayAllAudio").html('<i class="fa fa-pause"></i> Stop All');
+                isPlayAllOn = true;
+                currentPlayingId = 1;
+                playAudio();
+            }
+        }
+        function playAudio()
+        {
+            if (parseFloat(currentPlayingId) <= parseFloat($(".audio").length)) {
+                var player = new Plyr(document.getElementById(currentPlayingId));
+                player.play();
+            } else {
+                $("#btnPlayAllAudio").html('<i class="fa fa-play-circle"></i> Play All');
+                isPlayAllOn = false;
+                $(".audio").each(function () {
+                    var tmpPlayer = new Plyr(document.getElementById($(this).attr('id')));
+                    tmpPlayer.pause();
+                    tmpPlayer.stop();
+                });
+            }
         }
     </script>
 }

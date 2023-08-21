@@ -41,7 +41,16 @@ namespace Persistence.Repositories
                 if (user.IsDisabled) return new Tuple<byte, User>(2, null);
                 else
                 {
-                    if (user.Password != Password) return new Tuple<byte, User>(3, null);
+                    if (user.Password != Password)
+                    {
+                        if (user.IncorrectPasswordCount >= 7)
+                            user.IsDisabled = true;
+                        else
+                            user.IncorrectPasswordCount = user.IncorrectPasswordCount + 1;
+                        _context.Entry(user).State = System.Data.Entity.EntityState.Modified;
+                        _context.SaveChanges();
+                        return new Tuple<byte, User>(3, null);
+                    }
                     else
                     {
                         user.LastLoginDate = DateTime.Now;

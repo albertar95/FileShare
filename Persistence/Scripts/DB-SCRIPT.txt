@@ -6,9 +6,11 @@
                         LastLoginDate DateTime NULL,
                         IsDisabled INT NOT NULL,
                         IsAdmin INT NOT NULL,
+						IncorrectPasswordCount INT NOT NULL,
                         CreateDate DateTime NOT NULL,
                         LastModified DateTime NULL
               )
+			  /////////////////////////////////////
             Create Table Folders(
                         Id TEXT PRIMARY KEY  NOT NULL,
                         Title TEXT NOT NULL,
@@ -22,3 +24,22 @@
                         LastModified DateTime NULL,
 		        FOREIGN KEY(UserId) REFERENCES Users(Id)
                  )
+				 ////////////////////////////////////
+				{
+				  "Username": "admin",
+				  "Password": "1234",
+				  "Fullname": "admin",
+				  "IsDisabled": false,
+				  "IsAdmin": true
+				}
+				//////////////////////////////////////
+				{
+					"Id": "0d7b681b-ba17-4406-98c0-8cc065c61080",
+					"Title": "demo",
+					"IsLocal": true,
+					"IsPublic": true,
+					"IsProtected": false,
+					"Path": "D:\\\\test\\\\demo",
+					"VirtualPath": "http://localhost:5394/content/files/demo",
+					"UserId": "1a6d5fb0-7f09-4c49-ac97-0dae186ba9a7"
+				}

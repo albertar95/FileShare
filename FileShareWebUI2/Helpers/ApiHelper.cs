@@ -24,6 +24,8 @@ namespace FileShareWebUI2.Helpers
                 case HttpMethods.Get:
                     using (var client = new HttpClient())
                     {
+                        client.DefaultRequestHeaders.Add("accessToken",CacheHelper.GetCachedAccessToken());
+                        client.DefaultRequestHeaders.Add("ts", CacheHelper.timestamp.ToString());
                         var response = client.GetAsync(actionUrl);
                         result.ResultCode = response.Result.StatusCode;
                         result.Content = await response.Result.Content.ReadAsStringAsync();
@@ -32,6 +34,8 @@ namespace FileShareWebUI2.Helpers
                 case HttpMethods.Post:
                     using (var client = new HttpClient())
                     {
+                        client.DefaultRequestHeaders.Add("accessToken", CacheHelper.GetCachedAccessToken());
+                        client.DefaultRequestHeaders.Add("ts", CacheHelper.timestamp.ToString());
                         var response = client.PostAsync(actionUrl, content);
                         result.ResultCode = response.Result.StatusCode;
                         result.Content = await response.Result.Content.ReadAsStringAsync();
@@ -40,6 +44,8 @@ namespace FileShareWebUI2.Helpers
                 case HttpMethods.Put:
                     using (var client = new HttpClient())
                     {
+                        client.DefaultRequestHeaders.Add("accessToken", CacheHelper.GetCachedAccessToken());
+                        client.DefaultRequestHeaders.Add("ts", CacheHelper.timestamp.ToString());
                         var response = client.PutAsync(actionUrl, content);
                         result.ResultCode = response.Result.StatusCode;
                         result.Content = await response.Result.Content.ReadAsStringAsync();
@@ -48,6 +54,8 @@ namespace FileShareWebUI2.Helpers
                 case HttpMethods.Patch:
                     using (var client = new HttpClient())
                     {
+                        client.DefaultRequestHeaders.Add("accessToken", CacheHelper.GetCachedAccessToken());
+                        client.DefaultRequestHeaders.Add("ts", CacheHelper.timestamp.ToString());
                         var response = client.PostAsync(actionUrl, content);
                         result.ResultCode = response.Result.StatusCode;
                         result.Content = await response.Result.Content.ReadAsStringAsync();
@@ -56,6 +64,8 @@ namespace FileShareWebUI2.Helpers
                 case HttpMethods.Delete:
                     using (var client = new HttpClient())
                     {
+                        client.DefaultRequestHeaders.Add("accessToken", CacheHelper.GetCachedAccessToken());
+                        client.DefaultRequestHeaders.Add("ts", CacheHelper.timestamp.ToString());
                         var response = client.DeleteAsync(actionUrl);
                         result.ResultCode = response.Result.StatusCode;
                         result.Content = await response.Result.Content.ReadAsStringAsync();
@@ -64,6 +74,8 @@ namespace FileShareWebUI2.Helpers
                 case HttpMethods.Option:
                     using (var client = new HttpClient())
                     {
+                        client.DefaultRequestHeaders.Add("accessToken", CacheHelper.GetCachedAccessToken());
+                        client.DefaultRequestHeaders.Add("ts", CacheHelper.timestamp.ToString());
                         var response = client.GetAsync(actionUrl);
                         result.ResultCode = response.Result.StatusCode;
                         result.Content = await response.Result.Content.ReadAsStringAsync();

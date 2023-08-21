@@ -33,7 +33,7 @@
                         }
                         @if (cfile.FileContentType == Application.Model.FileContentType.Audio)
                         {
-                            <audio class="player" id="@cfile.Id" style="max-width:100%;max-height:100%;" controls>
+                            <audio class="player audio" id="@cfile.SecondaryIndex" style="max-width:100%;max-height:100%;" controls>
                                 <source src="@cfile.Vpath" type="@cfile.MimeType" />
                             </audio>
                         }

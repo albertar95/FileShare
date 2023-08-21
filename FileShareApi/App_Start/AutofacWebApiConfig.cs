@@ -5,6 +5,8 @@ using Application.Persistence.Common;
 using Application.Service.EntityMapper;
 using Autofac;
 using Autofac.Integration.WebApi;
+using FileShareApi.Auth.Contract;
+using FileShareApi.Auth.Service;
 using FileShareService.EntityMapper;
 using FileShareService.Helper;
 using Persistence.Contexts;
@@ -61,6 +63,7 @@ namespace FileShareApi.App_Start
             builder.RegisterType(typeof(EntityMapper)).As(typeof(IEntityMapper)).InstancePerRequest();
             builder.RegisterType(typeof(EncryptionHelper)).As(typeof(IEncryptionHelper)).InstancePerRequest();
             builder.RegisterType(typeof(DirectoryHelper)).As(typeof(IDirectoryHelper)).InstancePerRequest();
+            builder.RegisterType(typeof(AccessControl)).As(typeof(IAccessControl)).InstancePerRequest();
             Container = builder.Build();
             return Container;
         }

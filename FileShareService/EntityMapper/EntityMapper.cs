@@ -18,13 +18,14 @@ namespace FileShareService.EntityMapper
         {
             _mapper = new AutoMapper.Mapper(new MapperConfiguration(cfg => {
                 //user
-                cfg.CreateMap<User, UserDTO>().ReverseMap();
+                cfg.CreateMap<User, UserDTO>().AfterMap((s,d) => { d.Password = ""; });
+                cfg.CreateMap<UserDTO, User>();
                 cfg.CreateMap<User, CreateUserDTO>();
-                cfg.CreateMap<CreateUserDTO, User>().BeforeMap((s, d) => { d.CreateDate = DateTime.Now; d.Id = Guid.NewGuid(); });
+                cfg.CreateMap<CreateUserDTO, User>().BeforeMap((s, d) => { d.CreateDate = DateTime.Now; d.Id = Guid.NewGuid();d.IncorrectPasswordCount = 0; });
                 cfg.CreateMap<User, UpdateUserDTO>();
                 cfg.CreateMap<UpdateUserDTO, User>().BeforeMap((s, d) => { d.LastModified = DateTime.Now; });
                 //folder
-                cfg.CreateMap<Folder, FolderDTO>().BeforeMap((s,d) => { d.Username = s.User.Username; });
+                cfg.CreateMap<Folder, FolderDTO>().BeforeMap((s,d) => { d.Username = s.User.Username; }).AfterMap((s, d) => { d.VirtualPath = ""; });
                 cfg.CreateMap<FolderDTO, Folder>();
                 cfg.CreateMap<Folder, CreateFolderDTO>();
                 cfg.CreateMap<CreateFolderDTO, Folder>().BeforeMap((s, d) => { d.CreateDate = DateTime.Now; });

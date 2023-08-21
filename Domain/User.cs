@@ -13,6 +13,7 @@ namespace Domain
         public string Password { get; set; }
         public string Fullname { get; set; }
         public DateTime? LastLoginDate { get; set; }
+        public int IncorrectPasswordCount { get; set; }
         public bool IsDisabled { get; set; }
         public bool IsAdmin { get; set; }
         public virtual ICollection<Folder> Folders { get; set; }
