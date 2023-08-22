@@ -8,7 +8,11 @@
     <a href="@Url.Action("Folder","Home",new { Id = Model.RootFolderId, FolderId = Model.FolderId })" class="btn btn-default"><i class="fa fa-arrow-circle-o-left"></i> Return</a>
     @if (Model.GalleryContext == Application.Model.FileContentType.Audio)
     {
-    <button class="btn btn-success" id="btnPlayAllAudio" onclick="PlayAllAudio()"><i class="fa fa-play-circle"></i> Play All</button>
+        <button class="btn btn-success" id="btnPlayAllAudio" onclick="PlayAllAudio()"><i class="fa fa-play-circle"></i> Play All</button>
+        <button class="btn btn-default" id="btnPlayAllPrev" style="display:none;"><i class="fa fa-arrow-circle-left"></i></button>
+        <button class="btn btn-success" id="btnPlayAllPlay" style="display:none;"><i class="fa fa-play"></i></button>
+        <button class="btn btn-default" id="btnPlayAllNext" style="display:none;"><i class="fa fa-arrow-circle-right"></i></button>
+
     }
 </div>
 @for (int i = 0; i <= Model.RelatedFiles.Count / 3; i++)
@@ -28,7 +32,7 @@
                     <div class="panel-body">
                         @if (cfile.FileContentType == Application.Model.FileContentType.Video)
                         {
-                            <video controls playsinline class="player" id="@cfile.Id" style="max-width:100%;max-height:100%;">
+                            <video controls playsinline class="player video" id="@cfile.Id" style="max-width:100%;max-height:100%;">
                                 <!-- Video files -->
                                 <source src="@cfile.Vpath" type="@cfile.MimeType" size="576">
                                 <source src="@cfile.Vpath" type="@cfile.MimeType" size="720">
@@ -97,6 +101,8 @@
         var imageplayInterval = null;
         var currentPlayingId = 1;
         var isPlayOn = false;
+        var audios = {};
+        var videos = {};
         $(window).scroll(function () {
             if ($(window).scrollTop() == $(document).height() - $(window).height()) {
                 if (loadMore)
@@ -105,11 +111,17 @@
         });
         $(function ()
         {
-            $(".player").each(function () {
+            $(".audio").each(function () {
                 var tmpId = $(this).attr('id');
                 var tmpPlayer = new Plyr(document.getElementById(tmpId));
                 tmpPlayer.on('play', function () { mediaOnPlay(tmpId) });
                 tmpPlayer.on('ended', function () { mediaOnEnded(tmpId) });
+                audios[tmpId] = tmpPlayer;
+            });
+            $(".video").each(function () {
+                var tmpId = $(this).attr('id');
+                var tmpPlayer = new Plyr(document.getElementById(tmpId));
+                videos[tmpId] = tmpPlayer;
             });
             document.onkeydown = function (e) {
                 if ($("#MediaModal").hasClass('in')) {
@@ -144,10 +156,10 @@
         });
         function mediaOnPlay(id)
         {
-            $(".audio").each(function () {
-                var tmpPlayer = new Plyr(document.getElementById($(this).attr('id')));
-                tmpPlayer.stop();
-            });
+            for (const [key, value] of Object.entries(audios)) {
+                if (key != id)
+                    value.stop();
+            }
             currentPlayingId = id;
         }
         function mediaOnEnded(id) {
@@ -189,9 +201,21 @@
                         {
                             $("#NewItems").append(result.PageContent);
                             $("#txtPageNo").val(parseFloat($("#txtPageNo").val()) + parseFloat(1));
-                            $(".player").each(function ()
-                            {
-                                var tmpPlayer = new Plyr(document.getElementById($(this).attr('id')));
+                            $(".audio").each(function () {
+                                var tmpId = $(this).attr('id');
+                                if (!(tmpId in audios)) {
+                                    var tmpPlayer = new Plyr(document.getElementById(tmpId));
+                                    tmpPlayer.on('play', function () { mediaOnPlay(tmpId) });
+                                    tmpPlayer.on('ended', function () { mediaOnEnded(tmpId) });
+                                    audios[tmpId] = tmpPlayer;
+                                }
+                            });
+                            $(".video").each(function () {
+                                var tmpId = $(this).attr('id');
+                                if (!(tmpId in videos)) {
+                                    var tmpPlayer = new Plyr(document.getElementById(tmpId));
+                                    videos[tmpId] = tmpPlayer;
+                                }
                             });
                             if (result.noMore) {
                                 $("#btnMore").css('display', 'none');
@@ -236,12 +260,9 @@
             if (isPlayAllOn) {
                 $("#btnPlayAllAudio").html('<i class="fa fa-play-circle"></i> Play All');
                 isPlayAllOn = false;
-                $(".audio").each(function () {
-                    alert($(this).attr('id'))
-                    var tmpPlayer = new Plyr(document.getElementById($(this).attr('id')));
-                    tmpPlayer.pause();
-                    tmpPlayer.stop();
-                });
+                for (const [key, value] of Object.entries(audios)) {
+                        value.stop();
+                }
             } else
             {
                 $("#btnPlayAllAudio").html('<i class="fa fa-pause"></i> Stop All');
@@ -258,11 +279,9 @@
             } else {
                 $("#btnPlayAllAudio").html('<i class="fa fa-play-circle"></i> Play All');
                 isPlayAllOn = false;
-                $(".audio").each(function () {
-                    var tmpPlayer = new Plyr(document.getElementById($(this).attr('id')));
-                    tmpPlayer.pause();
-                    tmpPlayer.stop();
-                });
+                for (const [key, value] of Object.entries(audios)) {
+                    value.stop();
+                }
             }
         }
     </script>

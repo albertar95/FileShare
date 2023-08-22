@@ -95,8 +95,8 @@ namespace FileShareWebUI2.Helpers
                 if (result.IsSuccessfulResult())
                 {
                     var tmpFolder = ApiHelper.Deserialize<FolderDTO>(result.Content);
-                    //tmpFolder.VirtualPath = string.Format("{0}/{1}",VPTemplate,tmpFolder.Id);
-                    tmpFolder.VirtualPath = VPTemplate;
+                    tmpFolder.VirtualPath = string.Format("{0}/{1}", VPTemplate, tmpFolder.Id);
+                    //tmpFolder.VirtualPath = VPTemplate;
                     Folders.Add(tmpFolder);
                     return true;
                 }
@@ -117,8 +117,8 @@ namespace FileShareWebUI2.Helpers
                 {
                     Folders.Clear();
                     var tmpFolders = ApiHelper.Deserialize<List<FolderDTO>>(result.Content);
-                    //tmpFolders.ForEach(x => { x.VirtualPath = string.Format("{0}/{1}", VPTemplate, x.Id); });
-                    tmpFolders.ForEach(x => { x.VirtualPath = VPTemplate; });
+                    tmpFolders.ForEach(x => { x.VirtualPath = string.Format("{0}/{1}", VPTemplate, x.Id); });
+                    //tmpFolders.ForEach(x => { x.VirtualPath = VPTemplate; });
                     Folders.AddRange(tmpFolders);
                     return true;
                 }
@@ -403,20 +403,43 @@ namespace FileShareWebUI2.Helpers
         {
             try
             {
+                string ip;
+                ip = System.Web.HttpContext.Current.Request.ServerVariables["HTTP_X_FORWARDED_FOR"];
+                if (string.IsNullOrEmpty(ip))
+                {
+                    ip = System.Web.HttpContext.Current.Request.ServerVariables["REMOTE_ADDR"];
+                }
                 if (timestamp != 1)
                 {
                     if (DateTime.Now.Subtract(new DateTime(timestamp)) > TimeSpan.FromMinutes(1))
                     {
                         timestamp = DateTime.Now.Ticks;
-                        accessToken = _encryptionHelper.GenerateToken(HttpContext.Current.Request.UserHostAddress, timestamp.ToString());
+                        accessToken = _encryptionHelper.GenerateToken(ip, timestamp.ToString());
                     }
                 }
                 else
                 {
                     timestamp = DateTime.Now.Ticks;
-                    accessToken = _encryptionHelper.GenerateToken(HttpContext.Current.Request.UserHostAddress, timestamp.ToString());
+                    accessToken = _encryptionHelper.GenerateToken(ip, timestamp.ToString());
                 }
                 return accessToken;
+            }
+            catch (Exception)
+            {
+                return accessToken;
+            }
+        }
+        public static string GetCachedClientIp()
+        {
+            try
+            {
+                string ip;
+                ip = System.Web.HttpContext.Current.Request.ServerVariables["HTTP_X_FORWARDED_FOR"];
+                if (string.IsNullOrEmpty(ip))
+                {
+                    ip = System.Web.HttpContext.Current.Request.ServerVariables["REMOTE_ADDR"];
+                }
+                return ip;
             }
             catch (Exception)
             {

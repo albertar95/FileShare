@@ -10,5 +10,6 @@ namespace FileShareApi.Auth.Contract
     public interface IAccessControl
     {
         bool Check(HttpRequestMessage request);
+        string GetClientIp(HttpRequestMessage request = null);
     }
 }

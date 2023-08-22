@@ -13,7 +13,7 @@ namespace FileShareWebUI2.Helpers
     public class LocalDirectoryHelper : IDirectoryHelper
     {
         private static List<string> PictureExts = new List<string>() { ".jpg", ".png", ".gif" };
-        private static List<string> VideoExts = new List<string>() { ".mp4", ".mov", ".flv", ".ts", ".mkv", ".avi", ".wmv", ".3gp", ".webm", ".vob", ".m4v" };
+        private static List<string> VideoExts = new List<string>() { ".mp4", ".mov", ".flv", ".ts", ".mkv", ".avi", ".wmv", ".3gp", ".3gpp", ".webm", ".vob", ".m4v" };
         private static List<string> PdfExts = new List<string>() { ".pdf" };
         private static List<string> DocExts = new List<string>() { ".doc", ".docx" };
         private static List<string> SpreadSheetExts = new List<string>() { ".xls", ".xlsx" };
@@ -22,7 +22,7 @@ namespace FileShareWebUI2.Helpers
         private static List<string> CompressExts = new List<string>() { ".zip", ".rar", ".7z" };
         private static Dictionary<string, string> Mimes = new Dictionary<string, string>()
         { {".mp4","video/mp4"},{".mov","video/quicktime"},{".flv","video/x-flv"},{".ts","video/mp2t"},{".mkv","video/x-matroska"},{ ".avi","video/x-msvideo"}
-        ,{ ".wmv","video/x-ms-wmv"},{ ".3gp","video/3gpp"},{ ".webm","video/webm"},{ ".vob","video/dvd video/mpeg"},{ ".m4v","video/x-m4v"},
+        ,{ ".wmv","video/x-ms-wmv"},{ ".3gp","video/3gpp"},{ ".3gpp","video/3gpp"},{ ".webm","video/webm"},{ ".vob","video/dvd video/mpeg"},{ ".m4v","video/x-m4v"},
             { ".mp3","audio/mpeg"},{ ".wav","audio/x-wav"},{ ".flac","audio/x-flac"},{ ".m4a","audio/m4a"},{ ".wma","audio/x-ms-wma"} };
         public bool CheckDirectory(string path)
         {

@@ -26,7 +26,7 @@
 <h6>File Name : @Model.CurrentFile.Title</h6>
 @if (Model.CurrentFile.FileContentType == Application.Model.FileContentType.Video)
 {
-    <video controls playsinline id="player">
+    <video controls crossorigin playsinline id="player">
         <!-- Video files -->
         <source src="@Model.CurrentFile.Vpath" type="@Model.CurrentFile.MimeType" size="576">
         <source src="@Model.CurrentFile.Vpath" type="@Model.CurrentFile.MimeType" size="720">

@@ -470,6 +470,7 @@
     <Content Include="Views\Home\_MultimediaViewerPartial.cshtml" />
     <Content Include="Views\Home\MediaGallery.cshtml" />
     <Content Include="Views\Home\_MediaGalleryPartial.cshtml" />
+    <Content Include="Views\Home\Test.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
