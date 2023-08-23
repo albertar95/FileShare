@@ -5,21 +5,12 @@
 }
 <div id="FolderContentSection">
     <div class="row">
-        <div class="col-md-4">
+        <div class="col-md-6">
             <a style="margin:5px;" data-toggle="modal" data-target="#NewFolderModal" class="btn btn-success"><i class="fa fa-plus"></i> new folder</a>
             <a style="margin:5px;" data-toggle="modal" data-target="#UploadModal" class="btn btn-info"><i class="fa fa-upload"></i> upload</a>
-            <div style="margin:10px;">
-                <a style="margin:2px;" class="btn btn-primary"
-                   href="@Url.Action("MediaGallery","Home",new { RootFolderId = Model.Folder.Id, FolderId = Model.Directory.Id, FileType = Application.Model.FileContentType.Picture })"><i class="fa fa-picture-o"></i></a>
-                |
-                <a style="margin:2px;" class="btn btn-info"
-                   href="@Url.Action("MediaGallery","Home",new { RootFolderId = Model.Folder.Id, FolderId = Model.Directory.Id, FileType = Application.Model.FileContentType.Audio })"><i class="fa fa-music"></i></a>
-                |
-                <a style="margin:2px;" class="btn btn-success"
-                   href="@Url.Action("MediaGallery","Home",new { RootFolderId = Model.Folder.Id, FolderId = Model.Directory.Id, FileType = Application.Model.FileContentType.Video })"><i class="fa fa-video-camera"></i></a>
-            </div>
+            <a style="margin:5px;" target="_blank" href="@Url.Action("DownloadAllFiles", "Home", new { DirectoryId = Model.Directory.Id,RootFolderId = Model.Folder.Id })" class="btn btn-info"><i class="fa fa-download"></i> Download All</a>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-4">
             <div class="alert alert-success alert-dismissable" id="divSuccess" hidden>
                 <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
                 <p id="txtSuccess"></p>
@@ -40,7 +31,20 @@
             }
         </div>
     </div>
-
+    <div class="row">
+        <div class="col-lg-4">
+            <div style="margin:10px;">
+                <a style="margin:2px;" class="btn btn-primary"
+                   href="@Url.Action("MediaGallery","Home",new { RootFolderId = Model.Folder.Id, FolderId = Model.Directory.Id, FileType = Application.Model.FileContentType.Picture })"><i class="fa fa-picture-o"></i></a>
+                |
+                <a style="margin:2px;" class="btn btn-info"
+                   href="@Url.Action("MediaGallery","Home",new { RootFolderId = Model.Folder.Id, FolderId = Model.Directory.Id, FileType = Application.Model.FileContentType.Audio })"><i class="fa fa-music"></i></a>
+                |
+                <a style="margin:2px;" class="btn btn-success"
+                   href="@Url.Action("MediaGallery","Home",new { RootFolderId = Model.Folder.Id, FolderId = Model.Directory.Id, FileType = Application.Model.FileContentType.Video })"><i class="fa fa-video-camera"></i></a>
+            </div>
+        </div>
+    </div>
     <div class="row">
         <div class="col-md-12">
             <!-- Advanced Tables -->

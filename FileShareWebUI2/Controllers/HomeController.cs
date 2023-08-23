@@ -587,7 +587,7 @@ namespace FileShareWebUI2.Controllers
                 fvm.RootFolderId = RootFolderId;
                 fvm.FolderId = FolderId;
                 fvm.RelatedFiles = await CacheHelper.GetCachedRelatedContentForGallery(RootFolderId, FolderId, FileType
-                    , currentPage, FileType == FileContentType.Video ? 9 : FileType == FileContentType.Audio ? 30 : 60);
+                    , currentPage, FileType == FileContentType.Video ? 9 : FileType == FileContentType.Audio ? 15 : 30);
                 fvm.GalleryContext = FileType;
                 return Json(new { isSuccessfull = true, PageContent = ViewHelper.RenderViewToString(this, "_MediaGalleryPartial", fvm), noMore = fvm.RelatedFiles.Count == 0 ? true : false });
             }

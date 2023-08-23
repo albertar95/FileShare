@@ -1,20 +1,11 @@
 ﻿@model FileShareWebUI2.ViewModels.FolderViewModel
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-6">
         <a style="margin:5px;" data-toggle="modal" data-target="#NewFolderModal" class="btn btn-success"><i class="fa fa-plus"></i> new folder</a>
         <a style="margin:5px;" data-toggle="modal" data-target="#UploadModal" class="btn btn-info"><i class="fa fa-upload"></i> upload</a>
-        <div style="margin:10px;">
-            <a style="margin:2px;" class="btn btn-primary"
-               href="@Url.Action("MediaGallery","Home",new { RootFolderId = Model.Folder.Id, FolderId = Model.Directory.Id, FileType = Application.Model.FileContentType.Picture })"><i class="fa fa-picture-o"></i></a>
-            |
-            <a style="margin:2px;" class="btn btn-info"
-               href="@Url.Action("MediaGallery","Home",new { RootFolderId = Model.Folder.Id, FolderId = Model.Directory.Id, FileType = Application.Model.FileContentType.Audio })"><i class="fa fa-music"></i></a>
-            |
-            <a style="margin:2px;" class="btn btn-success"
-               href="@Url.Action("MediaGallery","Home",new { RootFolderId = Model.Folder.Id, FolderId = Model.Directory.Id, FileType = Application.Model.FileContentType.Video })"><i class="fa fa-video-camera"></i></a>
-        </div>
+        <a style="margin:5px;" target="_blank" href="@Url.Action("DownloadAllFiles", "Home", new { DirectoryId = Model.Directory.Id,RootFolderId = Model.Folder.Id })" class="btn btn-info"><i class="fa fa-download"></i> Download All</a>
     </div>
-    <div class="col-md-6">
+    <div class="col-md-4">
         <div class="alert alert-success alert-dismissable" id="divSuccess" hidden>
             <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
             <p id="txtSuccess"></p>
@@ -35,7 +26,20 @@
         }
     </div>
 </div>
-
+<div class="row">
+    <div class="col-lg-4">
+        <div style="margin:10px;">
+            <a style="margin:2px;" class="btn btn-primary"
+               href="@Url.Action("MediaGallery","Home",new { RootFolderId = Model.Folder.Id, FolderId = Model.Directory.Id, FileType = Application.Model.FileContentType.Picture })"><i class="fa fa-picture-o"></i></a>
+            |
+            <a style="margin:2px;" class="btn btn-info"
+               href="@Url.Action("MediaGallery","Home",new { RootFolderId = Model.Folder.Id, FolderId = Model.Directory.Id, FileType = Application.Model.FileContentType.Audio })"><i class="fa fa-music"></i></a>
+            |
+            <a style="margin:2px;" class="btn btn-success"
+               href="@Url.Action("MediaGallery","Home",new { RootFolderId = Model.Folder.Id, FolderId = Model.Directory.Id, FileType = Application.Model.FileContentType.Video })"><i class="fa fa-video-camera"></i></a>
+        </div>
+    </div>
+</div>
 <div class="row">
     <div class="col-md-12">
         <!-- Advanced Tables -->
@@ -62,13 +66,13 @@
                                         <td style="text-align:center;">@cnt.Title</td>
                                         @if (cnt.ContentType == Application.Model.FolderContentType.File)
                                         {
-                                        <td style="text-align:center;">
-                                            <a target="_blank" href="@Url.Action("DownloadFile", "Home", new { FileId = cnt.Id,RootFolderId = Model.Folder.Id })" class="btn btn-primary">Download</a>
-                                            @if (!(cnt.FileContentType == Application.Model.FileContentType.Unknown))
-                                            {
-                                                <a href="@Url.Action("ViewFile", "Home", new { FileId = cnt.Id,RootFolderId = Model.Folder.Id })" class="btn btn-default">View</a>
-                                            }
-                                        </td>
+                                            <td style="text-align:center;">
+                                                <a target="_blank" href="@Url.Action("DownloadFile", "Home", new { FileId = cnt.Id,RootFolderId = Model.Folder.Id })" class="btn btn-primary">Download</a>
+                                                @if (!(cnt.FileContentType == Application.Model.FileContentType.Unknown))
+                                                {
+                                                    <a href="@Url.Action("ViewFile", "Home", new { FileId = cnt.Id,RootFolderId = Model.Folder.Id })" class="btn btn-default">View</a>
+                                                }
+                                            </td>
                                         }
                                         else
                                         {
@@ -84,13 +88,13 @@
                                         <td style="text-align:center;">@cnt.Title</td>
                                         @if (cnt.ContentType == Application.Model.FolderContentType.File)
                                         {
-                                        <td style="text-align:center;">
-                                            <a href="@Url.Action("DownloadFile", "Home", new { FileId = cnt.Id,RootFolderId = Model.Folder.Id })" class="btn btn-primary">Download</a>
-                                            @if (!(cnt.FileContentType == Application.Model.FileContentType.Unknown))
-                                            {
-                                                <a href="@Url.Action("ViewFile", "Home", new { FileId = cnt.Id,RootFolderId = Model.Folder.Id })" class="btn btn-default">View</a>
-                                            }
-                                        </td>
+                                            <td style="text-align:center;">
+                                                <a href="@Url.Action("DownloadFile", "Home", new { FileId = cnt.Id,RootFolderId = Model.Folder.Id })" class="btn btn-primary">Download</a>
+                                                @if (!(cnt.FileContentType == Application.Model.FileContentType.Unknown))
+                                                {
+                                                    <a href="@Url.Action("ViewFile", "Home", new { FileId = cnt.Id,RootFolderId = Model.Folder.Id })" class="btn btn-default">View</a>
+                                                }
+                                            </td>
                                         }
                                         else
                                         {
@@ -118,7 +122,7 @@
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                 <h4 class="modal-title" id="myModalLabel">New Folder</h4>
             </div>
-            <form>
+            <form id="frmAddFolder">
                 <div class="modal-body">
                     <input class="form-control" name="FolderName" id="AddSubFolderFolderName" placeholder="Folder Name" autofocus />
                     <input id="AddSubFolderRootPath" value="@Model.Directory.Path" hidden readonly />
@@ -139,7 +143,7 @@
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                 <h4 class="modal-title" id="myModalLabel">Upload File</h4>
             </div>
-            <form>
+            <form id="frmUploadFile">
                 <div class="modal-body">
                     <input class="form-control" name="FileUpload" id="FileUpload" type="file" />
                     <input id="UploadRootPath" value="@Model.Directory.Path" hidden readonly />
