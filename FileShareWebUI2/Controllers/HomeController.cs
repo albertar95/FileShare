@@ -4,6 +4,7 @@ using Application.Helper;
 using Application.Model;
 using FileShareWebUI2.Helpers;
 using FileShareWebUI2.ViewModels;
+using ICSharpCode.SharpZipLib.Zip;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -595,6 +596,32 @@ namespace FileShareWebUI2.Controllers
             {
                 return Json(new { isSuccessfull = false });
             }
+        }
+        public async Task<bool> DownloadAllFiles(int DirectoryId,Guid RootFolderId,string FolderName)
+        {
+            var dirContent = (await CacheHelper.GetCachedDirectoryContentById(RootFolderId,DirectoryId)).Where(p => p.ContentType == FolderContentType.File).GroupBy(p => p.Path).Select(p => p.Key).ToList();
+            Response.AddHeader("Content-Disposition", "attachment; filename=" + FolderName + ".zip");
+            Response.ContentType = "application/zip";
+
+            using (var zipStream = new ZipOutputStream(Response.OutputStream))
+            {
+                foreach (string filePath in dirContent)
+                {
+                    byte[] fileBytes = System.IO.File.ReadAllBytes(filePath);
+
+                    var fileEntry = new ZipEntry(Path.GetFileName(filePath))
+                    {
+                        Size = fileBytes.Length
+                    };
+
+                    zipStream.PutNextEntry(fileEntry);
+                    zipStream.Write(fileBytes, 0, fileBytes.Length);
+                }
+
+                zipStream.Flush();
+                zipStream.Close();
+            }
+            return true;
         }
 
         //general section

@@ -3,7 +3,7 @@
     <div class="col-md-6">
         <a style="margin:5px;" data-toggle="modal" data-target="#NewFolderModal" class="btn btn-success"><i class="fa fa-plus"></i> new folder</a>
         <a style="margin:5px;" data-toggle="modal" data-target="#UploadModal" class="btn btn-info"><i class="fa fa-upload"></i> upload</a>
-        <a style="margin:5px;" target="_blank" href="@Url.Action("DownloadAllFiles", "Home", new { DirectoryId = Model.Directory.Id,RootFolderId = Model.Folder.Id })" class="btn btn-info"><i class="fa fa-download"></i> Download All</a>
+        <a style="margin:5px;" target="_blank" href="@Url.Action("DownloadAllFiles", "Home", new { DirectoryId = Model.Directory.Id,RootFolderId = Model.Folder.Id,FolderName = Model.Directory.Title })" class="btn btn-info"><i class="fa fa-download"></i> Download All</a>
     </div>
     <div class="col-md-4">
         <div class="alert alert-success alert-dismissable" id="divSuccess" hidden>
@@ -45,7 +45,7 @@
         <!-- Advanced Tables -->
         <div class="panel panel-default">
             <div class="panel-heading">
-                Folder : @Model.Folder.Title
+                Folder : @Model.Directory.Title
             </div>
             <div class="panel-body" id="tblContents">
                 <div class="table-responsive">
