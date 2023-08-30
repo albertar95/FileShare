@@ -5,6 +5,7 @@ using Application.Model;
 using FileShareWebUI2.Helpers;
 using FileShareWebUI2.ViewModels;
 using ICSharpCode.SharpZipLib.Zip;
+using NReco.VideoConverter;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -623,7 +624,23 @@ namespace FileShareWebUI2.Controllers
             }
             return true;
         }
-
+        public async Task<bool> ConvertToMp4(long FileId, Guid RootFolderId)
+        {
+            try
+            {
+                FileViewModel fvm = new FileViewModel();
+                fvm.CurrentFile = await CacheHelper.GetCachedContentById(RootFolderId, FileId);
+                fvm.RootFolderId = RootFolderId;
+                var stream = new FileStream(fvm.CurrentFile.Path.Replace(fvm.CurrentFile.Format, ".mp4"), FileMode.Create);
+                var converter = new FFMpegConverter();
+                converter.ConvertMedia(fvm.CurrentFile.Path,fvm.CurrentFile.Format.Replace(".", ""), stream, Format.mp4, new ConvertSettings() {  VideoFrameSize = FrameSize.hd720 });
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
         //general section
         [AllowAnonymous]
         public ActionResult Login(string ReturnUrl = "")

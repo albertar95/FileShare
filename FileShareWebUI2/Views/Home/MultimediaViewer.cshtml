@@ -22,6 +22,7 @@
         }
         Folder Gallery
     </a>
+    <a href="@Url.Action("ConvertToMp4","Home",new { RootFolderId = Model.RootFolderId, FileId = Model.CurrentFile.RootFolderId })" class="btn btn-default"><i class="fa fa-puzzle-piece"></i>Convert</a>
 </div>
 <h6>File Name : @Model.CurrentFile.Title</h6>
 @if (Model.CurrentFile.FileContentType == Application.Model.FileContentType.Video)
